@@ -1,6 +1,10 @@
-package main;
-import  "fmt";
+package main
+
+import (
+	io "grafos/packages/io"
+)
 
 func main() {
-	fmt.Println("Hello World!");
-} 
+	matrix := io.GenMatrix()
+	io.GetMatriz(matrix)
+}
