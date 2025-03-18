@@ -1,6 +1,7 @@
 package main
 
 import (
+	"maps"
 	"reflect"
 	"testing"
 )
@@ -23,7 +24,7 @@ func TestNode(t *testing.T) {
 	esperado := b
 
 	if resultado != esperado {
-		t.Fatalf("Nó resultado não é o esperado. resultado: %p, esperado: %p", resultado, esperado)
+		t.Fatalf("nó resultado não é o esperado. resultado: %p, esperado: %p", resultado, esperado)
 	}
 
 	a.Remover(b)
@@ -36,7 +37,7 @@ func TestNode(t *testing.T) {
 	esperado = c
 
 	if resultado != esperado {
-		t.Fatalf("Nó resultado não é o esperado. resultado: %p, esperado: %p", resultado, esperado)
+		t.Fatalf("nó resultado não é o esperado. resultado: %p, esperado: %p", resultado, esperado)
 	}
 
 	a.Conectar(a)
@@ -137,9 +138,9 @@ func TestConjunto(t *testing.T) {
 		resultado := conjunto.VerticesGrau()
 		esperado := map[*Node]int{a: 5, b: 4, c: 3, d: 0, e: 2, f: 3}
 
-		if !reflect.DeepEqual(resultado, esperado) {
+		if !maps.Equal(resultado, esperado) {
 			t.Fatalf(
-				"lista de adjacência retornada não é a esperada.\nresultado: %#v\nesperado: %#v",
+				"vertices do grau retornados não são os esperados.\nresultado: %#v\nesperado: %#v",
 				resultado, esperado,
 			)
 		}
@@ -149,9 +150,9 @@ func TestConjunto(t *testing.T) {
 		resultado := conjunto.GrafoGrau()
 		esperado := 5
 
-		if !reflect.DeepEqual(resultado, esperado) {
+		if resultado != esperado {
 			t.Fatalf(
-				"lista de adjacência retornada não é a esperada.\nresultado: %#v\nesperado: %#v",
+				"grau de grafo retornado não é a esperada.\nresultado: %#v\nesperado: %#v",
 				resultado, esperado,
 			)
 		}
@@ -240,7 +241,7 @@ func TestVerificarArvore(t *testing.T) {
 		t.Fail()
 	}
 	if completa {
-		t.Log("verificação retornada não é a esperada: árvore agora não mais é completa")
+		t.Log("verificação retornada não é a esperada: árvore não mais é completa")
 		t.Fail()
 	}
 	if t.Failed() {

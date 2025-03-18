@@ -77,8 +77,8 @@ func (c conjunto) VerticesGrau() map[*Node]int {
 	panic("não implementado!")
 }
 
-// retorna o número de grau máximo entre todos os vértices
-func (c conjunto) GrafoGrau() map[*Node]int {
+// retorna o número máximo do grau de todos os vértices
+func (c conjunto) GrafoGrau() int {
 	panic("não implementado!")
 }
 
