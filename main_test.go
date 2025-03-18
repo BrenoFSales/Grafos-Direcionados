@@ -327,13 +327,21 @@ func TestVerificarSimples(t *testing.T) {
 	b = a.NovoNode("2")
 	c := b.NovoNode("3")
 	c.Conectar(a)
-	a.Conectar(a)
 
 	resultado = conjunto.VerificarSimples()
 	esperado = true
 
 	if resultado != esperado {
 		t.Fatal("verificação retornada não é a esperada: grafo é simples")
+	}
+
+	a.Conectar(a)
+
+	resultado = conjunto.VerificarSimples()
+	esperado = false
+
+	if resultado != esperado {
+		t.Fatal("verificação retornada não é a esperada: grafo não é simples")
 	}
 
 }
