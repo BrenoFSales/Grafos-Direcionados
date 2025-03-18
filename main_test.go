@@ -270,6 +270,16 @@ func TestVerificarCompleto(t *testing.T) {
 	if resultado != esperado {
 		t.Fatal("verificação retornada não é a esperada: grafo é completo")
 	}
+
+	vertices[0].Remover(vertices[1])
+
+	resultado = conjunto.VerificarCompleto()
+	esperado = false
+
+	if resultado != esperado {
+		t.Fatal("verificação retornada não é a esperada: grafo não é completo")
+	}
+
 }
 
 func TestVerificarLacos(t *testing.T) {
