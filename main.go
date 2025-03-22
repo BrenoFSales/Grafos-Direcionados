@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type conjunto []*Node
 
@@ -11,23 +14,56 @@ type Node struct {
 }
 
 // aresta unidirecional entre dois nós: a -> b.
-func (a *Node) Conectar(b *Node) {
-	panic("não implementado!")
+func (a *Node) Conectar(b *Node) error {
+	if a == nil || b == nil {
+		return errors.New("O nó não pode ser nulo.")
+	}
+	a.filhos = append(a.filhos, b)
+	return nil
 }
 
 // deve retornar o primeiro nó com o mesmo valor caso haja mais de um.
 func (a *Node) Get(valor string) (*Node, error) {
-	panic("não implementado!")
+	// panic("não implementado!")
+	if a.id == valor {
+		return a, nil
+	} else {
+		for index, node := range a.filhos {
+			if node.id == valor {
+				fmt.Printf("-- Seu nó está no índice: %d\n", index)
+				fmt.Println("-- Informação do nó:")
+				fmt.Printf("- Id: %s\n-- Filhos:\n", node.id)
+				for _, filho := range node.filhos {
+					fmt.Printf("- %s\n", filho.id)
+				}
+			}
+		}
+		return nil, errors.New("nó não encontrado")
+	}
 }
 
 // grau de um vértice
 func (a *Node) Grau() int {
-	panic("não implementado!")
+	// panic("não implementado!")
+	return len(a.filhos)
 }
 
 // deve remover o primeiro nó caso o haja mais de um.
-func (a *Node) Remover(b *Node) (*Node, error) {
-	panic("não implementado!")
+// Por que isso aqui receberia um nó ao invés do valor que deve ser buscado wtf?
+// Precisa retornar um erro?
+// func (a *Node) Remover(b *Node) (*Node, error) ???
+func (a *Node) Remover(id string) {
+	// panic("não implementado!")
+	nodePai, err := a.Get(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+	for index, node := range a.filhos {
+		if node.id == nodePai.id {
+			// https://www.geeksforgeeks.org/delete-elements-in-a-slice-in-golang/
+			a.filhos = append(a.filhos[:index], a.filhos[index+1:]...)
+		}
+	}
 }
 
 // cria um novo nó sem conexões com tal valor.
