@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 )
-
 type conjunto []*Node
 
 type Node struct {
@@ -131,8 +130,4 @@ func (c conjunto) VerificarLacos() bool {
 // verifica se grafo é um grafo simples
 func (c conjunto) VerificarSimples() bool {
 	panic("não implementado!")
-}
-
-func main() {
-	fmt.Println("Hello World!")
 }

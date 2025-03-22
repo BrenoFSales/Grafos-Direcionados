@@ -292,7 +292,7 @@ func TestVerificarLacos(t *testing.T) {
 	esperado := true
 
 	if resultado != esperado {
-		t.Fatal("verificação retornada não é a esperada: grafo é possuí um laço")
+		t.Fatal("verificação retornada não é a esperada: grafo possuí um laço")
 	}
 
 	conjunto = NovoConjunto()
@@ -302,7 +302,7 @@ func TestVerificarLacos(t *testing.T) {
 	esperado = false
 
 	if resultado != esperado {
-		t.Fatal("verificação retornada não é a esperada: segundo grafo não possuí um laços")
+		t.Fatal("verificação retornada não é a esperada: segundo grafo não possuí um laço")
 	}
 
 }
