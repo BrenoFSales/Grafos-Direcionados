@@ -10,9 +10,7 @@ import (
 )
 
 type D3Node struct {
-	Id string  `json:"id"`
-	X  float64 `json:"x"`
-	Y  float64 `json:"y"`
+	Id string `json:"id"`
 }
 
 type D3Link struct {
@@ -31,8 +29,6 @@ func paraD3(conjunto conjunto) D3NodeLink {
 	for _, node := range conjunto {
 		saida.Nodes = append(saida.Nodes, D3Node{
 			Id: node.rotulo,
-			X:  node.x,
-			Y:  node.y,
 		})
 		for _, filho := range node.filhos {
 			saida.Links = append(saida.Links, D3Link{
@@ -80,9 +76,7 @@ func main() {
 			panic(err)
 		}
 
-		salvo := principal.NovoNode(entrada.Id)
-		salvo.x = entrada.X
-		salvo.y = entrada.Y
+		principal.NovoNode(entrada.Id)
 
 		saida := paraD3(principal)
 		bytes, err = json.Marshal(saida)
