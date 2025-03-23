@@ -1,4 +1,4 @@
-package mainstring
+package main
 
 import (
 	"errors"
