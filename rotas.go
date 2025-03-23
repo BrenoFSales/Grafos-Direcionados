@@ -25,7 +25,10 @@ type D3NodeLink struct {
 
 func paraD3(conjunto conjunto) D3NodeLink {
 
-	var saida D3NodeLink
+	var saida D3NodeLink = D3NodeLink{
+		Nodes: make([]D3Node, 0),
+		Links: make([]D3Link, 0),
+	}
 	for _, node := range conjunto {
 		saida.Nodes = append(saida.Nodes, D3Node{
 			Id: node.rotulo,
