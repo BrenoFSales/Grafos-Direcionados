@@ -10,10 +10,11 @@ import (
 type conjunto []*Node
 
 type Node struct {
-	conjunto conjunto
+	conjunto *conjunto
 	rotulo   string
 	id       uuid.UUID
 	filhos   []*Node
+	x, y     float64
 }
 
 // aresta unidirecional entre dois nós: a -> b.
@@ -54,15 +55,19 @@ func (a *Node) Remover(id uuid.UUID) {
 }
 
 // cria um novo nó sem conexões e com tal valor.
-func (c conjunto) NovoNode(rotulo string) *Node {
+func (c *conjunto) NovoNode(rotulo string) *Node {
 	node := &Node{
 		conjunto: c,
 		rotulo:   rotulo,
 		filhos:   make([]*Node, 0),
 		id:       uuid.New(),
 	}
-	c = append(c, node)
+	*c = append(*c, node)
 	return node
+}
+
+func (c conjunto) String() string {
+	return c.String()
 }
 
 // cria um novo nó filho pertencendo ao mesmo conjunto que o objeto sendo chamado.

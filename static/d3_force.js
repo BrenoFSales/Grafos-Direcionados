@@ -9,6 +9,25 @@ window.onresize = () => {
 	svg.setAttribute("height", height);
 }
 
+// Declaração dos nós do dígrafo
+var nodes = [
+	{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" },
+	{ id: "E" }
+];
+
+// Declaração das conexões direcionadas de cada nó
+var links = [
+	{ source: "A", target: "E" },
+	{ source: "B", target: "D" },
+	{ source: "C", target: "B" },
+	{ source: "D", target: "A" },
+	{ source: "D", target: "C" },
+	{ source: "D", target: "E" },
+	{ source: "E", target: "C" },
+	{ source: "E", target: "C" },
+];
+// D3 usa a referência desses dois objetos para salvar informações essenciais dos nós como posição e etc.
+
 function renderizar(nodes, links) {
 
 	// Limpa qualquer coisa que tenha sido feito previamente para
@@ -34,19 +53,19 @@ function renderizar(nodes, links) {
 
 	// Criação da Simulação (Forças)
 	const simulation = d3.forceSimulation(nodes)
-	.force("link", d3.forceLink(links).id(d => d.id).distance(300))
-	.force("charge", d3.forceManyBody().strength(-60))
-	.force("center", d3.forceCenter(width / 2, height / 2));
+		.force("link", d3.forceLink(links).id(d => d.id).distance(300))
+		.force("charge", d3.forceManyBody().strength(-60))
+		.force("center", d3.forceCenter(width / 2, height / 2));
 
 	const link = svg.selectAll(".link")
-	.data(links)
-	.enter().append("line")
-	.attr("class", "link");
+		.data(links)
+		.enter().append("line")
+		.attr("class", "link");
 
 	const node = svg.selectAll(".node")
-	.data(nodes)
-	.enter().append("g")
-	.attr("class", "node");
+		.data(nodes)
+		.enter().append("g")
+		.attr("class", "node");
 
 	// Tamanho dos nós
 	node.append("circle")
@@ -68,54 +87,50 @@ function renderizar(nodes, links) {
 			.attr("transform", d => `translate(${d.x},${d.y})`);
 	});
 
-	// Adiciona a física de arraso e repulsão dos nós	
+	// Adiciona a física de arraso e repulsão dos nós
 	const drag = d3.drag()
-	.on("start", (event, d) => {
-		if (!event.active) simulation.alphaTarget(0.3).restart();
-		d.fx = d.x;
-		d.fy = d.y;
-	})
-	.on("drag", (event, d) => {
-		d.fx = event.x;
-		d.fy = event.y;
-	})
-	.on("end", (event, d) => {
-		if (!event.active) simulation.alphaTarget(0);
-		d.fx = null;
-		d.fy = null;
-	});
+		.on("start", (event, d) => {
+			if (!event.active) simulation.alphaTarget(0.3).restart();
+			d.fx = d.x;
+			d.fy = d.y;
+		})
+		.on("drag", (event, d) => {
+			d.fx = event.x;
+			d.fy = event.y;
+		})
+		.on("end", (event, d) => {
+			if (!event.active) simulation.alphaTarget(0);
+			d.fx = null;
+			d.fy = null;
+		});
 
 	// Inicializa a mecânica de física
 	node.call(drag);
 }
 
+(async () => {
+	let resposta = await fetch('/node', { method: 'GET' });
+	let { nodes: nodes_, links: links_ } = await resposta.json();
+	nodes = nodes_;
+	links = links_;
+	renderizar(nodes, links)
+})();
 
-// Declaração dos nós do dígrafo	
-const nodes = [
-	{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" },
-	{ id: "E" }
-];
+async function adicionarNode() {
 
-// Declaração das conexões direcionadas de cada nó
-const links = [
-	{ source: "A", target: "E" },
-	{ source: "B", target: "D" },
-	{ source: "C", target: "B" },
-	{ source: "D", target: "A" },
-	{ source: "D", target: "C" },
-	{ source: "D", target: "E" },
-	{ source: "E", target: "C" },
-	{ source: "E", target: "C" },
-];
-// D3 usa a referência desses dois objetos para salvar informações essenciais dos nós como posição e etc.
+	// adiciona um nó ao grafo, porém antes sincroniza com o back todos os nós que temos aqui.
 
-renderizar(nodes, links)
-
-function adicionarNode() {
 	let input = document.querySelector('input#adicionar');
 	input = input;
 	input.value = input.value;
-	nodes.push({id: input.value, x: width/2, y: height/2 });
+
+	let novo = { id: input.value, x: width / 2, y: height / 2 };
+
+	await fetch('/node', { method: 'POST', body: JSON.stringify(novo) });
+
+	nodes.push(novo)
+
 	renderizar(nodes, links);
+
 	input.value = '';
 }
