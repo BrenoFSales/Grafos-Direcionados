@@ -53,7 +53,7 @@ func (a *Node) Remover(id uuid.UUID) {
 	panic("nó não encontrado!")
 }
 
-// cria um novo nó sem conexões com tal valor.
+// cria um novo nó sem conexões e com tal valor.
 func (c conjunto) NovoNode(rotulo string) *Node {
 	node := &Node{
 		conjunto: c,
@@ -78,7 +78,7 @@ func NovoConjunto() conjunto {
 }
 
 // cria uma matriz de adjacência onde todos os nós são ordenados pelo rótulo em colunas e linhas
-// em ordem crescente
+// em ordem alfabética
 func (c conjunto) MatrizAdjacencia() [][]int {
 	panic("não implementado!")
 }
