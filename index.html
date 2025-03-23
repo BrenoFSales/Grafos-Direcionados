@@ -25,31 +25,31 @@
 
 		<fieldset id="inputs">
 			<legend>Adicionar Aresta</legend>
-				<label>De:</label>
-				<select>
+			<label>De:</label>
+			<form onsubmit="conectarNodes()" action="javascript:void(0)">
+
+				<select id="select-de">
 					<option value="">123</option>
 					<option value="">123</option>
 					<option value="">123</option>
 					<option value="">123</option>
 				</select>
 				<label>Para:</label>
-				<select>
+				<select id="select-para">
 					<option value="">123</option>
 					<option value="">123</option>
 					<option value="">123</option>
 					<option value="">123</option>
 				</select>
-				<button type="submit" onsubmit="">Adicionar</button>
+				<button type="submit">Adicionar</button>
+			</form>
 		</fieldset>
 
 
 		<fieldset id="inputs">
 			<legend>Exemplos</legend>
-			<select style="width: 100%;">
-				<option value="">1</option>
-				<option value="">2</option>
-				<option value="">3</option>
-				<option value="">4</option>
+			<select id="preset" style="width: 100%;">
+				<option value="principal">principal</option>
 			</select>
 		</fieldset>
 

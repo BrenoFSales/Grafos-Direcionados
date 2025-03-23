@@ -66,6 +66,13 @@ func (c *conjunto) NovoNode(rotulo string) *Node {
 	return node
 }
 
+func (c *conjunto) Get(rotulo string) *Node {
+	idx := slices.IndexFunc(*c, func(x *Node) bool {
+		return x.rotulo == rotulo
+	})
+	return (*c)[idx]
+}
+
 func (c conjunto) String() string {
 	return c.String()
 }
@@ -78,8 +85,8 @@ func (a *Node) NovoNode(rotulo string) *Node {
 }
 
 // cria um novo conjunto vazio de nós.
-func NovoConjunto() conjunto {
-	return make(conjunto, 0)
+func NovoConjunto() *conjunto {
+	return new(conjunto)
 }
 
 // cria uma matriz de adjacência onde todos os nós são ordenados pelo rótulo em colunas e linhas

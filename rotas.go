@@ -23,13 +23,13 @@ type D3NodeLink struct {
 	Links []D3Link `json:"links"`
 }
 
-func paraD3(conjunto conjunto) D3NodeLink {
+func paraD3(conjunto *conjunto) D3NodeLink {
 
 	var saida D3NodeLink = D3NodeLink{
 		Nodes: make([]D3Node, 0),
 		Links: make([]D3Link, 0),
 	}
-	for _, node := range conjunto {
+	for _, node := range *conjunto {
 		saida.Nodes = append(saida.Nodes, D3Node{
 			Id: node.rotulo,
 		})
@@ -53,6 +53,10 @@ func main() {
 	b.Conectar(c)
 	c.Conectar(a)
 
+	exemplos := map[string]*conjunto{
+		"principal": principal,
+	}
+
 	http.Handle("/", http.FileServer(http.Dir("./")))
 	http.HandleFunc("GET /node", func(w http.ResponseWriter, r *http.Request) {
 
@@ -67,6 +71,37 @@ func main() {
 		_, _ = w.Write(bytes)
 	})
 
+	http.HandleFunc("POST /link/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
+
+		conjuntoSelectionado := r.PathValue("conjunto")
+		if conjuntoSelectionado == "" {
+			panic("vazio")
+		}
+
+		conjunto := exemplos[conjuntoSelectionado]
+
+		bytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
+		}
+		var entrada D3Link
+
+		if err = json.Unmarshal(bytes, &entrada); err != nil {
+			panic(err)
+		}
+
+		if entrada.Source == "" || entrada.Target == "" {
+			panic("vazio")
+		}
+
+		source := conjunto.Get(entrada.Source)
+		target := conjunto.Get(entrada.Target)
+
+		source.Conectar(target)
+
+		w.WriteHeader(204)
+	})
+
 	http.HandleFunc("POST /node", func(w http.ResponseWriter, r *http.Request) {
 
 		bytes, err := io.ReadAll(r.Body)
@@ -79,15 +114,13 @@ func main() {
 			panic(err)
 		}
 
-		principal.NovoNode(entrada.Id)
-
-		saida := paraD3(principal)
-		bytes, err = json.Marshal(saida)
-		if err != nil {
-			panic(err)
+		if entrada.Id == "" {
+			panic("vazio")
 		}
 
-		_, _ = w.Write(bytes)
+		principal.NovoNode(entrada.Id)
+
+		w.WriteHeader(204)
 	})
 
 	fmt.Println("http://localhost:7373")

@@ -113,7 +113,8 @@ function renderizar(nodes, links) {
 	let { nodes: nodes_, links: links_ } = await resposta.json();
 	nodes = nodes_;
 	links = links_;
-	renderizar(nodes, links)
+	renderizar(nodes, links);
+	atualizarListaDeNodes();
 })();
 
 async function adicionarNode() {
@@ -126,11 +127,46 @@ async function adicionarNode() {
 
 	let novo = { id: input.value, x: width / 2, y: height / 2 };
 
-	await fetch('/node', { method: 'POST', body: JSON.stringify(novo) });
+	let resposta = await fetch('/node', { method: 'POST', body: JSON.stringify(novo) });
+	if (!resposta.ok) {
+		throw resposta.ok;
+	}
 
-	nodes.push(novo)
+	nodes.push(novo);
 
 	renderizar(nodes, links);
 
+	atualizarListaDeNodes();
+
 	input.value = '';
+}
+
+function atualizarListaDeNodes() {
+	let de = document.querySelector('#select-de');
+	let para = document.querySelector('#select-para');
+	de.innerHTML = '';
+	para.innerHTML = '';
+
+	for (let i = 0; i < nodes.length; i++) {
+		de.innerHTML += `<option value="${nodes[i].id}">${nodes[i].id}</option>`;
+		para.innerHTML += `<option value="${nodes[i].id}">${nodes[i].id}</option>`;
+	}
+}
+
+async function conectarNodes() {
+	let de = document.querySelector('#select-de');
+	let para = document.querySelector('#select-para');
+	let exemplo = document.querySelector('select#preset');
+
+	var link = { source: de.value, target: para.value };
+
+
+	let resposta = await fetch(`/link/${exemplo.value}`, { method: 'POST', body: JSON.stringify(link) });
+	if (!resposta.ok) {
+		throw resposta.ok;
+	}
+
+	links.push(link);
+
+	renderizar(nodes, links);
 }
