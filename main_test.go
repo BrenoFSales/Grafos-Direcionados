@@ -1,4 +1,4 @@
-package main
+package mainstring
 
 import (
 	"maps"
@@ -15,7 +15,7 @@ func TestNode(t *testing.T) {
 	a.Conectar(b)
 	a.Conectar(c)
 
-	resultado, err := a.Get("2")
+	resultado, err := a.Get(b.id)
 
 	if err != nil {
 		t.Fatal(err)
@@ -27,9 +27,9 @@ func TestNode(t *testing.T) {
 		t.Fatalf("nó resultado não é o esperado. resultado: %p, esperado: %p", resultado, esperado)
 	}
 
-	a.Remover(b)
+	a.Remover(b.id)
 
-	resultado, err = a.Get("2")
+	resultado, err = a.Get(c.id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,16 +40,22 @@ func TestNode(t *testing.T) {
 		t.Fatalf("nó resultado não é o esperado. resultado: %p, esperado: %p", resultado, esperado)
 	}
 
+	a.Remover(c.id)
+
 	a.Conectar(a)
 	a.Conectar(a)
 
-	a.Remover(a)
+	a.Remover(a.id)
 
-	grauresultado := a.Grau()
+	grauResultado := a.Grau()
 	grauEsperado := 1
 
-	if grauresultado != grauEsperado {
-		t.Fatalf("Grau nó resultado não é o esperado. resultado: %v, esperado: %p", resultado, esperado)
+	if grauResultado != grauEsperado {
+		t.Log(a)
+		t.Fatalf(
+			"Grau nó resultado não é o esperado. resultado: %v, esperado: %v",
+			grauResultado, grauEsperado,
+		)
 	}
 }
 
@@ -204,7 +210,7 @@ func TestVerificarArvore(t *testing.T) {
 		t.FailNow()
 	}
 
-	g.Remover(h)
+	g.Remover(h.id)
 	arvore, binaria, cheia, completa = conjunto.VerificarArvore()
 	if !arvore {
 		t.Log("verificação retornada não é a esperada: grafo é uma árvore")
@@ -226,7 +232,7 @@ func TestVerificarArvore(t *testing.T) {
 		t.FailNow()
 	}
 
-	a.Remover(b)
+	a.Remover(b.id)
 	arvore, binaria, cheia, completa = conjunto.VerificarArvore()
 	if !arvore {
 		t.Log("verificação retornada não é a esperada: grafo é uma árvore")
@@ -271,7 +277,7 @@ func TestVerificarCompleto(t *testing.T) {
 		t.Fatal("verificação retornada não é a esperada: grafo é completo")
 	}
 
-	vertices[0].Remover(vertices[1])
+	vertices[0].Remover(vertices[1].id)
 
 	resultado = conjunto.VerificarCompleto()
 	esperado = false

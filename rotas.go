@@ -1,4 +1,4 @@
-package main
+package mainstring
 
 import (
 	_ "embed"

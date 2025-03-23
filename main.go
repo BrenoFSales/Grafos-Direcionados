@@ -1,40 +1,36 @@
-package main
+package mainstring
 
 import (
 	"errors"
-	"fmt"
+	"slices"
+
+	"github.com/google/uuid"
 )
+
 type conjunto []*Node
 
 type Node struct {
 	conjunto conjunto
-	id       string
+	rotulo   string
+	id       uuid.UUID
 	filhos   []*Node
 }
 
 // aresta unidirecional entre dois nós: a -> b.
-func (a *Node) Conectar(b *Node) error {
-	if a == nil || b == nil {
-		return errors.New("O nó não pode ser nulo.")
-	}
+func (a *Node) Conectar(b *Node) {
+	_ = *b
 	a.filhos = append(a.filhos, b)
-	return nil
 }
 
-// deve retornar o primeiro nó com o mesmo valor caso haja mais de um.
-func (a *Node) Get(valor string) (*Node, error) {
+// deve retornar o primeiro nó com o mesmo id caso haja mais de um.
+func (a *Node) Get(id uuid.UUID) (*Node, error) {
 	// panic("não implementado!")
-	if a.id == valor {
+	if a.id == id {
 		return a, nil
 	} else {
-		for index, node := range a.filhos {
-			if node.id == valor {
-				fmt.Printf("-- Seu nó está no índice: %d\n", index)
-				fmt.Println("-- Informação do nó:")
-				fmt.Printf("- Id: %s\n-- Filhos:\n", node.id)
-				for _, filho := range node.filhos {
-					fmt.Printf("- %s\n", filho.id)
-				}
+		for _, node := range a.filhos {
+			if node.id == id {
+				return node, nil
 			}
 		}
 		return nil, errors.New("nó não encontrado")
@@ -43,34 +39,27 @@ func (a *Node) Get(valor string) (*Node, error) {
 
 // grau de um vértice
 func (a *Node) Grau() int {
-	// panic("não implementado!")
 	return len(a.filhos)
 }
 
-// deve remover o primeiro nó caso o haja mais de um.
-// Por que isso aqui receberia um nó ao invés do valor que deve ser buscado wtf?
-// Precisa retornar um erro?
-// func (a *Node) Remover(b *Node) (*Node, error) ???
-func (a *Node) Remover(id string) {
-	// panic("não implementado!")
-	nodePai, err := a.Get(id)
-	if err != nil {
-		fmt.Println(err)
-	}
+// deve remover o primeiro nó caso o haja mais de um com o mesmo id.
+func (a *Node) Remover(id uuid.UUID) {
 	for index, node := range a.filhos {
-		if node.id == nodePai.id {
-			// https://www.geeksforgeeks.org/delete-elements-in-a-slice-in-golang/
-			a.filhos = append(a.filhos[:index], a.filhos[index+1:]...)
+		if node.id == id {
+			a.filhos = slices.Delete(a.filhos, index, index+1)
+			return
 		}
 	}
+	panic("nó não encontrado!")
 }
 
 // cria um novo nó sem conexões com tal valor.
 func (c conjunto) NovoNode(id string) *Node {
 	node := &Node{
 		conjunto: c,
-		id:       id,
+		rotulo:   id,
 		filhos:   make([]*Node, 0),
+		id:       uuid.New(),
 	}
 	c = append(c, node)
 	return node
