@@ -54,10 +54,10 @@ func (a *Node) Remover(id uuid.UUID) {
 }
 
 // cria um novo nó sem conexões com tal valor.
-func (c conjunto) NovoNode(id string) *Node {
+func (c conjunto) NovoNode(rotulo string) *Node {
 	node := &Node{
 		conjunto: c,
-		rotulo:   id,
+		rotulo:   rotulo,
 		filhos:   make([]*Node, 0),
 		id:       uuid.New(),
 	}
@@ -66,8 +66,8 @@ func (c conjunto) NovoNode(id string) *Node {
 }
 
 // cria um novo nó filho pertencendo ao mesmo conjunto que o objeto sendo chamado.
-func (a *Node) NovoNode(id string) *Node {
-	node := a.conjunto.NovoNode(id)
+func (a *Node) NovoNode(rotulo string) *Node {
+	node := a.conjunto.NovoNode(rotulo)
 	a.Conectar(node)
 	return node
 }
@@ -77,13 +77,13 @@ func NovoConjunto() conjunto {
 	return make(conjunto, 0)
 }
 
-// cria uma matriz de adjacência onde todos os nós são ordenados pelo id em colunas e linhas
+// cria uma matriz de adjacência onde todos os nós são ordenados pelo rótulo em colunas e linhas
 // em ordem crescente
 func (c conjunto) MatrizAdjacencia() [][]int {
 	panic("não implementado!")
 }
 
-// cria uma lista de adjacência onde todos os conjuntos são representados pelos seus IDs, em ordem alfabética,
+// cria uma lista de adjacência onde todos os conjuntos são representados pelos seus rótulos, em ordem alfabética,
 // onde cada índice aponta para uma array dos nós filhos
 func (c conjunto) ListaAdjacencia() [][]*Node {
 	panic("não implementado!")
