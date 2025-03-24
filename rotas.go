@@ -83,7 +83,10 @@ func main() {
 			panic("vazio")
 		}
 
-		conjunto := exemplos[conjuntoSelectionado]
+		conjunto, ok := exemplos[conjuntoSelectionado]
+		if !ok {
+			log.Panic(ok, conjuntoSelectionado)
+		}
 
 		saida := paraD3(conjunto)
 

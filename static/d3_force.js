@@ -163,10 +163,29 @@ async function conectarNodes() {
 	renderizar(nodes, links);
 }
 
-async function trocarExemplo() {
-	let exemplo = document.querySelector('select#preset');
+// isso faz questão de manter salvo o exemplo selecionado para que o usuário
+// veja o mesmo exemplo toda vez que recarregue a página.
+async function trocarExemplo(evento) {
 
-	let resposta = await fetch(`/node/${exemplo.value}`, { method: 'GET' });
+	const url = new URL(window.location.href);
+
+	// 
+	let exemploSelecionado = document.querySelector('select#preset').value;
+	let parametroExemploSalvo = url.searchParams.get('exemplo');
+
+	let casoParametroExemploPresente = parametroExemploSalvo !== null;
+	let casoUsuarioRecarregouPagina = evento === undefined;
+	// evento será um objeto defindo caso essa função tenha sido chamada pelo onchange do elemento select.
+	// nesse caso, o usuário selecionou um novo exemplo e queremos mudar para o novo exemplo.
+	// evento é undefined quando essa função é chamada uma única vez no primeiro load da página.
+	// nesse caso, queromos selecionar o exemplo salvo na url.
+	if (casoUsuarioRecarregouPagina && casoParametroExemploPresente) {
+		exemploSelecionado = parametroExemploSalvo;
+		// alterar select para que também reflita a escolha.
+		document.querySelector('select#preset').value = parametroExemploSalvo;
+	}
+
+	let resposta = await fetch(`/node/${exemploSelecionado}`, { method: 'GET' });
 	if (!resposta.ok) {
 		throw resposta.ok;
 	}
@@ -175,6 +194,14 @@ async function trocarExemplo() {
 	links = links_;
 	renderizar(nodes, links);
 	atualizarListaDeNodes();
+
+	console.log(exemploSelecionado);
+
+	// atualiza a url para que toda vez que o usuário recarregar a página, o mesmo exemplo será exibido.
+	const parametrosNovos = new URLSearchParams({exemplo: exemploSelecionado}).toString();
+
+	console.log(parametrosNovos);
+	window.history.replaceState(null, "", `${url.pathname}?${parametrosNovos}`)
 }
 
 trocarExemplo();
