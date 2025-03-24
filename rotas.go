@@ -53,14 +53,39 @@ func main() {
 	b.Conectar(c)
 	c.Conectar(a)
 
+	grafoCompleto := NovoConjunto()
+	grafoCompletoVertices := []*Node{
+		grafoCompleto.NovoNode("1"), grafoCompleto.NovoNode("2"), grafoCompleto.NovoNode("3"),
+		grafoCompleto.NovoNode("4"), grafoCompleto.NovoNode("5"), grafoCompleto.NovoNode("6"),
+		grafoCompleto.NovoNode("7"),
+	}
+	for i := range grafoCompletoVertices {
+		for j := range grafoCompletoVertices {
+			if i == j {
+				continue
+			}
+			a, b := grafoCompletoVertices[i], grafoCompletoVertices[j]
+			a.Conectar(b)
+			b.Conectar(a)
+		}
+	}
+
 	exemplos := map[string]*conjunto{
 		"principal": principal,
+		"completo":  grafoCompleto,
 	}
 
 	http.Handle("/", http.FileServer(http.Dir("./")))
-	http.HandleFunc("GET /node", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("GET /node/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
 
-		saida := paraD3(principal)
+		conjuntoSelectionado := r.PathValue("conjunto")
+		if conjuntoSelectionado == "" {
+			panic("vazio")
+		}
+
+		conjunto := exemplos[conjuntoSelectionado]
+
+		saida := paraD3(conjunto)
 
 		bytes, err := json.Marshal(saida)
 
@@ -102,7 +127,14 @@ func main() {
 		w.WriteHeader(204)
 	})
 
-	http.HandleFunc("POST /node", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("POST /node/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
+
+		conjuntoSelectionado := r.PathValue("conjunto")
+		if conjuntoSelectionado == "" {
+			panic("vazio")
+		}
+
+		conjunto := exemplos[conjuntoSelectionado]
 
 		bytes, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -118,7 +150,7 @@ func main() {
 			panic("vazio")
 		}
 
-		principal.NovoNode(entrada.Id)
+		conjunto.NovoNode(entrada.Id)
 
 		w.WriteHeader(204)
 	})

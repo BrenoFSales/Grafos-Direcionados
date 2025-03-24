@@ -108,26 +108,18 @@ function renderizar(nodes, links) {
 	node.call(drag);
 }
 
-(async () => {
-	let resposta = await fetch('/node', { method: 'GET' });
-	let { nodes: nodes_, links: links_ } = await resposta.json();
-	nodes = nodes_;
-	links = links_;
-	renderizar(nodes, links);
-	atualizarListaDeNodes();
-})();
-
 async function adicionarNode() {
 
 	// adiciona um nó ao grafo, porém antes sincroniza com o back todos os nós que temos aqui.
 
 	let input = document.querySelector('input#adicionar');
+	let exemplo = document.querySelector('select#preset');
 	input = input;
 	input.value = input.value;
 
 	let novo = { id: input.value, x: width / 2, y: height / 2 };
 
-	let resposta = await fetch('/node', { method: 'POST', body: JSON.stringify(novo) });
+	let resposta = await fetch(`/node/${exemplo.value}`, { method: 'POST', body: JSON.stringify(novo) });
 	if (!resposta.ok) {
 		throw resposta.ok;
 	}
@@ -170,3 +162,19 @@ async function conectarNodes() {
 
 	renderizar(nodes, links);
 }
+
+async function trocarExemplo() {
+	let exemplo = document.querySelector('select#preset');
+
+	let resposta = await fetch(`/node/${exemplo.value}`, { method: 'GET' });
+	if (!resposta.ok) {
+		throw resposta.ok;
+	}
+	let { nodes: nodes_, links: links_ } = await resposta.json();
+	nodes = nodes_;
+	links = links_;
+	renderizar(nodes, links);
+	atualizarListaDeNodes();
+}
+
+trocarExemplo();

@@ -264,7 +264,10 @@ func TestVerificarCompleto(t *testing.T) {
 		conjunto.NovoNode("7"),
 	}
 	for i := range vertices {
-		for j := 0; j+i < len(vertices); j++ {
+		for j := range vertices {
+			if i == j {
+				continue
+			}
 			a, b := vertices[i], vertices[j]
 			a.Conectar(b)
 			b.Conectar(a)
