@@ -183,6 +183,6 @@ func main() {
 
 	})
 
-	fmt.Println("http://localhost:7373")
-	log.Fatal(http.ListenAndServe(":7373", nil))
+	fmt.Println("http://0.0.0.0:7373")
+	log.Fatal(http.ListenAndServe("0.0.0.0:7373", nil))
 }
