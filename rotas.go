@@ -70,36 +70,34 @@ func main() {
 		}
 	}
 
+	arvoreBinaria := NovoConjunto()
+	a = arvoreBinaria.NovoNode("a")
+	b = a.NovoNode("b")
+	c = a.NovoNode("c")
+
+	d := b.NovoNode("d")
+	e := b.NovoNode("e")
+
+	f := c.NovoNode("f")
+	g := c.NovoNode("g")
+
+	d.NovoNode("h")
+	d.NovoNode("i")
+	e.NovoNode("j")
+	e.NovoNode("k")
+
+	f.NovoNode("l")
+	f.NovoNode("m")
+	g.NovoNode("n")
+	g.NovoNode("o")
+
 	exemplos := map[string]*conjunto{
 		"principal": principal,
 		"completo":  grafoCompleto,
+		"binaria":   arvoreBinaria,
 	}
 
-	http.Handle("/", http.FileServer(http.Dir("./")))
-	http.HandleFunc("GET /node/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
-
-		conjuntoSelectionado := r.PathValue("conjunto")
-		if conjuntoSelectionado == "" {
-			panic("vazio")
-		}
-
-		conjunto, ok := exemplos[conjuntoSelectionado]
-		if !ok {
-			log.Panic(ok, conjuntoSelectionado)
-		}
-
-		saida := paraD3(conjunto)
-
-		bytes, err := json.Marshal(saida)
-
-		if err != nil {
-			panic(err)
-		}
-
-		_, _ = w.Write(bytes)
-	})
-
-	http.HandleFunc("POST /link/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/link/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
 
 		conjuntoSelectionado := r.PathValue("conjunto")
 		if conjuntoSelectionado == "" {
@@ -121,16 +119,25 @@ func main() {
 		if entrada.Source == "" || entrada.Target == "" {
 			panic("vazio")
 		}
-
 		source := conjunto.Get(entrada.Source)
 		target := conjunto.Get(entrada.Target)
 
-		source.Conectar(target)
+		switch r.Method {
+		case "POST":
+			source.Conectar(target)
+			w.WriteHeader(204)
+		case "DELETE":
+			source.Remover(target.id)
+			w.WriteHeader(204)
+		default:
+			w.WriteHeader(405)
+		}
 
-		w.WriteHeader(204)
 	})
 
-	http.HandleFunc("POST /node/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
+	http.Handle("/", http.FileServer(http.Dir("./")))
+
+	http.HandleFunc("/node/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
 
 		conjuntoSelectionado := r.PathValue("conjunto")
 		if conjuntoSelectionado == "" {
@@ -139,23 +146,41 @@ func main() {
 
 		conjunto := exemplos[conjuntoSelectionado]
 
-		bytes, err := io.ReadAll(r.Body)
-		if err != nil {
-			panic(err)
+		switch r.Method {
+		case "GET":
+			saida := paraD3(conjunto)
+
+			bytes, err := json.Marshal(saida)
+
+			if err != nil {
+				panic(err)
+			}
+
+			_, _ = w.Write(bytes)
+		case "POST":
+			bytes, err := io.ReadAll(r.Body)
+			if err != nil {
+				panic(err)
+			}
+			var entrada D3Node
+
+			if err = json.Unmarshal(bytes, &entrada); err != nil {
+				panic(err)
+			}
+			if entrada.Id == "" {
+				panic("vazio")
+			}
+
+			conjunto.NovoNode(entrada.Id)
+
+			w.WriteHeader(204)
+
+		case "DELETE":
+			fallthrough
+		default:
+			w.WriteHeader(405)
 		}
-		var entrada D3Node
 
-		if err = json.Unmarshal(bytes, &entrada); err != nil {
-			panic(err)
-		}
-
-		if entrada.Id == "" {
-			panic("vazio")
-		}
-
-		conjunto.NovoNode(entrada.Id)
-
-		w.WriteHeader(204)
 	})
 
 	fmt.Println("http://localhost:7373")

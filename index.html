@@ -12,38 +12,33 @@
 </head>
 
 <body>
-	<header>
+	<header style="resize: horizontal;">
 		<h1>Operações</h1>
 
 		<fieldset id="inputs">
 			<legend>Adicionar Nó</legend>
 			<form onsubmit="adicionarNode()" action="javascript:void(0)">
-				<input id="adicionar" type="text">
+				<input id="adicionar" type="text" placeholder="Nome do novo nó....">
 				<button type="submit" onsubmit="">Adicionar</button>
 			</form>
 		</fieldset>
 
 		<fieldset id="inputs">
 			<legend>Adicionar Aresta</legend>
-			<form onsubmit="conectarNodes()" action="javascript:void(0)">
 
-				<div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-					<label>De:</label>
-					<select id="select-de">
-						<option value="">123</option>
-						<option value="">123</option>
-						<option value="">123</option>
-						<option value="">123</option>
-					</select>
-					<label>Para:</label>
-					<select id="select-para">
-						<option value="">123</option>
-						<option value="">123</option>
-						<option value="">123</option>
-						<option value="">123</option>
-					</select>
-				</div>
+			<div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+				<label>De:</label>
+				<select id="select-de">
+				</select>
+				<label>Para:</label>
+				<select id="select-para">
+				</select>
+			</div>
+			<form onsubmit="conectarNodes()" action="javascript:void(0)">
 				<button style="width: 100%;" type="submit">Adicionar</button>
+			</form>
+			<form onsubmit="deletarAresta()" action="javascript:void(0)">
+				<button style="width: 100%;" type="submit">Deletar</button>
 			</form>
 		</fieldset>
 
@@ -52,23 +47,23 @@
 			<legend>Exemplos</legend>
 			<select onchange="trocarExemplo(event)" id="preset" style="width: 100%;">
 				<option value="principal">Principal</option>
-
 				<option value="completo">Grafo Completo</option>
+				<option value="binaria">Arvore Binária</option>
 			</select>
 		</fieldset>
 
 		<fieldset id="inputs">
 			<legend>Matrix Adjacência</legend>
-			<input type="button" class="little_button" value="-" />
-			<select name="graph_scale" id="graph_scale"></select>
-			<input type="button" class="little_button" value="+" />
+			<form onsubmit="alert(1)">
+				<button type="submit" style="width: 100%">Verificar</button>
+			</form>
 		</fieldset>
 
 		<fieldset id="inputs">
 			<legend>Lista Adjacência</legend>
-			<input type="button" class="little_button" value="-" />
-			<select name="graph_scale" id="graph_scale"></select>
-			<input type="button" class="little_button" value="+" />
+			<form onsubmit="alert(1)">
+				<button type="submit" style="width: 100%">Verificar</button>
+			</form>
 		</fieldset>
 
 	</header>

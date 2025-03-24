@@ -145,6 +145,27 @@ function atualizarListaDeNodes() {
 	}
 }
 
+async function deletarAresta() {
+	let de = document.querySelector('#select-de');
+	let para = document.querySelector('#select-para');
+	let exemplo = document.querySelector('select#preset');
+
+	var link = { source: de.value, target: para.value };
+
+	let resposta = await fetch(`/link/${exemplo.value}`, { method: 'DELETE', body: JSON.stringify(link) });
+	if (!resposta.ok) {
+		throw resposta.ok;
+	}
+
+	let index = links.findIndex(({source, target}) => source.id == link.source && target.id == link.target);
+	if (index < 0) {
+		throw index;
+	}
+	links = links.filter((_, i) => i != index);
+
+	renderizar(nodes, links);
+}
+
 async function conectarNodes() {
 	let de = document.querySelector('#select-de');
 	let para = document.querySelector('#select-para');

@@ -45,13 +45,10 @@ func (a *Node) Grau() int {
 
 // deve remover o primeiro nó caso o haja mais de um com o mesmo id.
 func (a *Node) Remover(id uuid.UUID) {
-	for index, node := range a.filhos {
-		if node.id == id {
-			a.filhos = slices.Delete(a.filhos, index, index+1)
-			return
-		}
-	}
-	panic("nó não encontrado!")
+	idx := slices.IndexFunc(a.filhos, func(x *Node) bool {
+		return x.id == id
+	})
+	a.filhos = slices.Delete(a.filhos, idx, idx+1)
 }
 
 // cria um novo nó sem conexões e com tal valor.
