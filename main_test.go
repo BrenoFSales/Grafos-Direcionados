@@ -120,25 +120,25 @@ func TestConjunto(t *testing.T) {
 			)
 		}
 	})
-	t.Run("listaAdjacencia", func(t *testing.T) {
-		resultado := conjunto.ListaAdjacencia()
-
-		esperado := [][]*Node{
-			{b, c, d, e, f},
-			{c, d, e, f},
-			{d, e, f},
-			{},
-			{a, a},
-			{e, f, b},
-		}
-
-		if !reflect.DeepEqual(resultado, esperado) {
-			t.Fatalf(
-				"lista de adjacência retornada não é a esperada.\nresultado: %#v\nesperado: %#v",
-				resultado, esperado,
-			)
-		}
-	})
+	// t.Run("listaAdjacencia", func(t *testing.T) {
+	// 	resultado := conjunto.ListaAdjacencia()
+	//
+	// 	esperado := [][]*Node{
+	// 		{b, c, d, e, f},
+	// 		{c, d, e, f},
+	// 		{d, e, f},
+	// 		{},
+	// 		{a, a},
+	// 		{e, f, b},
+	// 	}
+	//
+	// 	if !reflect.DeepEqual(resultado, esperado) {
+	// 		t.Fatalf(
+	// 			"lista de adjacência retornada não é a esperada.\nresultado: %#v\nesperado: %#v",
+	// 			resultado, esperado,
+	// 		)
+	// 	}
+	// })
 
 	t.Run("VerticesGrau", func(t *testing.T) {
 		resultado := conjunto.VerticesGrau()

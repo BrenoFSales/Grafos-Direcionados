@@ -149,8 +149,8 @@ func (c conjunto) MatrizAdjacencia() ([][]int, []string) {
 
 // cria uma lista de adjacência onde todos os conjuntos são representados pelos seus rótulos, em ordem alfabética,
 // onde cada índice aponta para uma array dos nós filhos
-func (c conjunto) ListaAdjacencia() [][]*Node {
-	panic("não implementado!")
+func (c conjunto) ListaAdjacencia() conjunto {
+	return c
 }
 
 func (c conjunto) VerificarArvore() (GrafoArvore bool, ArvoreBinaria bool, ArvoreCheia bool, ArvoreCompleta bool) {

@@ -125,11 +125,10 @@ async function adicionarNode() {
 
 	nodes.push(novo);
 
-	renderizar(nodes, links);
-	atualizarListaDeNodes();
-	await atualizarMatrizAdjacencia();
-
 	input.value = '';
+
+	await atualizar();
+
 }
 
 async function deletarNode() {
@@ -149,26 +148,13 @@ async function deletarNode() {
 	links = links.filter(link => !(link.source.id === input.value || link.target.id === input.value));
 	nodes = nodes.filter(node => node.id !== deletar.id);
 
-	renderizar(nodes, links);
-
-	atualizarListaDeNodes();
 
 	input.value = '';
 
 	// OBS! Se adicionar um novo Nó e removê-lo só funciona depois de recarregar o cache,
 	// e caso o Nó tenha arestas ligadas a ele, ao removê-lo a aplicação crasha
-}
 
-function atualizarListaDeNodes() {
-	let de = document.querySelector('#select-de');
-	let para = document.querySelector('#select-para');
-	de.innerHTML = '';
-	para.innerHTML = '';
-
-	for (let i = 0; i < nodes.length; i++) {
-		de.innerHTML += `<option value="${nodes[i].id}">${nodes[i].id}</option>`;
-		para.innerHTML += `<option value="${nodes[i].id}">${nodes[i].id}</option>`;
-	}
+	await atualizar()
 }
 
 async function deletarAresta() {
@@ -186,7 +172,7 @@ async function deletarAresta() {
 	let index = links.findIndex(({ source, target }) => source.id == link.source && target.id == link.target);
 	if (index < 0) { throw index; } links = links.filter((_, i) => i != index);
 
-	renderizar(nodes, links);
+	await atualizar();
 }
 
 async function conectarNodes() {
@@ -204,8 +190,7 @@ async function conectarNodes() {
 
 	links.push(link);
 
-	renderizar(nodes, links);
-	await atualizarMatrizAdjacencia();
+	await atualizar();
 }
 
 // isso faz questão de manter salvo o exemplo selecionado para que o usuário
@@ -238,19 +223,14 @@ async function trocarExemplo(evento) {
 	nodes = nodes_;
 	links = links_;
 
-	renderizar(nodes, links);
-	atualizarListaDeNodes();
-	atualizarMatrizAdjacencia();
-
 	// atualiza a url para que toda vez que o usuário recarregar a página, o mesmo exemplo será exibido.
 	const parametrosNovos = new URLSearchParams({ exemplo: exemploSelecionado }).toString();
 
-	console.log(parametrosNovos);
 	window.history.replaceState(null, "", `${url.pathname}?${parametrosNovos}`)
 
-}
+	await atualizar();
 
-trocarExemplo();
+}
 
 async function atualizarMatrizAdjacencia() {
 	let exibirRotulos = document.querySelector('#exibir-rotulos');
@@ -275,3 +255,55 @@ async function toggleMatrizAdjacencia() {
 		await atualizarMatrizAdjacencia();
 	}
 }
+
+
+async function atualizarListaAdjacencia() {
+	let exemplo = document.querySelector('select#preset');
+	let resposta = await fetch(`/lista/${exemplo.value}`);
+	if (!resposta.ok) {
+		throw resposta.ok;
+	}
+	let lista = await resposta.text();
+	katex.render(lista, document.querySelector('#lista'), { throwOnError: true, });
+}
+
+async function toggleListaAdjacencia() {
+	let lista = document.querySelector('#lista');
+	let butao = document.querySelector('#lista-toggle');
+	lista.classList.toggle('hidden')
+	if (lista.classList.contains('hidden')) {
+		butao.textContent = 'Mostrar';
+	} else {
+		butao.textContent = 'Esconder';
+		await atualizarListaAdjacencia();
+	}
+}
+
+function atualizarListaDeNodes() {
+	let de = document.querySelector('#select-de');
+	let para = document.querySelector('#select-para');
+	de.innerHTML = '';
+	para.innerHTML = '';
+
+	for (let i = 0; i < nodes.length; i++) {
+		de.innerHTML += `<option value="${nodes[i].id}">${nodes[i].id}</option>`;
+		para.innerHTML += `<option value="${nodes[i].id}">${nodes[i].id}</option>`;
+	}
+}
+
+
+async function atualizar() {
+	renderizar(nodes, links);
+	atualizarListaDeNodes();
+	await atualizarMatrizAdjacencia();
+	await atualizarListaAdjacencia();
+}
+
+
+
+
+
+
+
+trocarExemplo();
+

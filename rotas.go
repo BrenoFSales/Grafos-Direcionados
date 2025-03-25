@@ -227,9 +227,42 @@ func main() {
 				}
 				linha = append(linha, s)
 			}
-			w.Write([]byte(fmt.Sprintf("%s \\\\\n", strings.Join(linha, " & "))))
+			fmt.Fprintf(w, "%s \\\\\n", strings.Join(linha, " & "))
 		}
 
+	})
+
+	http.HandleFunc("/lista/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
+		conjuntoSelectionado := r.PathValue("conjunto")
+		if conjuntoSelectionado == "" {
+			panic("vazio")
+		}
+
+		conjunto := exemplos[conjuntoSelectionado]
+
+		// cria a representação em latex de uma lista de adjacência.
+		// o resultado é sempre algo parecido com isso:
+		//
+		// \begin{array}{l}
+		//	1: 2 \\
+		// 	2: 1, 3 \\
+		// 	3: 2 \\
+		// \end{array}
+
+		// tamanhoStringMaximo := 0
+		// for _, node := range *conjunto {
+		// 	tamanhoStringMaximo = max(tamanhoStringMaximo, len(node.rotulo))
+		// }
+
+		fmt.Fprintf(w, "\\begin{array}{l}\n")
+		for _, node := range *conjunto {
+			var s []string
+			for _, filho := range node.filhos {
+				s = append(s, filho.rotulo)
+			}
+			fmt.Fprintf(w, "%s: %s \\\\\n", node.rotulo, strings.Join(s, ", "))
+		}
+		fmt.Fprintf(w, "\\end{array}\n")
 	})
 
 	fmt.Println("http://0.0.0.0:7373")

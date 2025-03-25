@@ -72,14 +72,13 @@
 
 		<fieldset id="inputs">
 			<legend>Lista Adjacência</legend>
-			<form onsubmit="alert(1)">
-				<button type="submit" style="width: 100%">Verificar</button>
-			</form>
+			<button id="lista-toggle" type="submit" style="width: 100%" onclick="toggleListaAdjacencia()">Mostrar</button>
 		</fieldset>
 
 	</header>
 	<section class="latex-display">
 		<div id="matriz" class="hidden" style="max-width: 200px; color: white;"></div>
+		<div id="lista" class="hidden" style="max-width: 200px; color: white;"></div>
 	</section>
 
 	<main id="grafo-exibicao"></main>
