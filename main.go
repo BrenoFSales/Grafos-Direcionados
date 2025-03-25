@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"slices"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -115,10 +116,33 @@ func NovoConjunto() *conjunto {
 	return new(conjunto)
 }
 
+func contarOcorrenciasDoMesmoNode(pai, filho *Node) int {
+	retorno := 0
+	for _, n := range pai.filhos {
+		if n == filho {
+			retorno++
+		}
+	}
+	return retorno
+}
+
 // cria uma matriz de adjacência onde todos os nós são ordenados pelo rótulo em colunas e linhas
 // em ordem alfabética
 func (c conjunto) MatrizAdjacencia() [][]int {
-	panic("não implementado!")
+	clone := slices.Clone(c)
+	slices.SortFunc(clone, func(a, b *Node) int {
+		return strings.Compare(a.rotulo, b.rotulo)
+	})
+	var retorno = make([][]int, len(clone))
+	for i := range retorno {
+		retorno[i] = make([]int, len(clone))
+	}
+	for i := range clone {
+		for j := range clone {
+			retorno[i][j] = contarOcorrenciasDoMesmoNode(clone[i], clone[j])
+		}
+	}
+	return retorno
 }
 
 // cria uma lista de adjacência onde todos os conjuntos são representados pelos seus rótulos, em ordem alfabética,
