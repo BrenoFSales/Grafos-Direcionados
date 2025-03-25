@@ -73,10 +73,8 @@ func (c *conjunto) Remover(rotulo string) {
 			return x.rotulo == rotulo
 		})
 
-		if idxFilho != 1 {
+		if idxFilho != -1 {
 			node.filhos = slices.Delete(node.filhos, idxFilho, idxFilho+1)
-		} else {
-			panic("O IndexFunc retornou -1 para os filhos do nó a ser deletado, esse índice não existe!")
 		}
 	}
 }

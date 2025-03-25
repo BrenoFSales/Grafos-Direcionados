@@ -146,8 +146,7 @@ async function deletarNode() {
 		throw resposta.ok;
 	}
 
-	links = links.filter(link => link.source !== deletar.id && link.target !== deletar.id);
-
+	links = links.filter(link => !(link.source.id === input.value || link.target.id === input.value));
 	nodes = nodes.filter(node => node.id !== deletar.id);
 
 	renderizar(nodes, links);
