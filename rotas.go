@@ -176,7 +176,23 @@ func main() {
 			w.WriteHeader(204)
 
 		case "DELETE":
-			fallthrough
+			bytes, err := io.ReadAll(r.Body)
+			if err != nil {
+				panic(err)
+			}
+
+			var entrada D3Node
+
+			if err = json.Unmarshal(bytes, &entrada); err != nil {
+				panic(err)
+			}
+			if entrada.Id == "" {
+				panic("vazio")
+			}
+
+			conjunto.Remover(entrada.Id)
+
+			w.WriteHeader(204)
 		default:
 			w.WriteHeader(405)
 		}

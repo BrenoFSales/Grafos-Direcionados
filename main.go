@@ -48,7 +48,36 @@ func (a *Node) Remover(id uuid.UUID) {
 	idx := slices.IndexFunc(a.filhos, func(x *Node) bool {
 		return x.id == id
 	})
-	a.filhos = slices.Delete(a.filhos, idx, idx+1)
+	if idx != -1 {
+		a.filhos = slices.Delete(a.filhos, idx, idx+1)
+	} else {
+		panic("O IndexFunc retornou -1 para o Node, esse índice não existe!")
+	}
+}
+
+func (c *conjunto) Remover(rotulo string) {
+
+	idx := slices.IndexFunc(*c, func(x *Node) bool {
+		return x.rotulo == rotulo
+	})
+
+	if idx != -1 { // Evita erro ao acessar índices inválidos
+		*c = slices.Delete(*c, idx, idx+1)
+	} else {
+		panic("O IndexFunc retornou -1 para o conjunto, esse índice não existe!")
+	}
+
+	for _, node := range *c {
+		idxFilho := slices.IndexFunc(node.filhos, func(x *Node) bool {
+			return x.rotulo == rotulo
+		})
+
+		if idxFilho != 1 {
+			node.filhos = slices.Delete(node.filhos, idxFilho, idxFilho+1)
+		} else {
+			panic("O IndexFunc retornou -1 para os filhos do nó a ser deletado, esse índice não existe!")
+		}
+	}
 }
 
 // cria um novo nó sem conexões e com tal valor.

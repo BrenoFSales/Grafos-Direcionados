@@ -109,10 +109,9 @@ function renderizar(nodes, links) {
 }
 
 async function adicionarNode() {
-
 	// adiciona um nó ao grafo, porém antes sincroniza com o back todos os nós que temos aqui.
 
-	let input = document.querySelector('input#adicionar');
+	let input = document.querySelector('input#nameNode');
 	let exemplo = document.querySelector('select#preset');
 	input = input;
 	input.value = input.value;
@@ -131,6 +130,34 @@ async function adicionarNode() {
 	atualizarListaDeNodes();
 
 	input.value = '';
+}
+
+async function deletarNode() {
+	// deleta o nó no grafo, e então sincroniza com o back.
+	let input = document.querySelector('input#nameNode');
+	let exemplo = document.querySelector('select#preset');
+	input = input;
+	input.value = input.value;
+
+	let deletar = { id: input.value };
+
+	let resposta = await fetch(`/node/${exemplo.value}`, {method: 'DELETE', body: JSON.stringify(deletar)});
+	if (!resposta.ok) {
+		throw resposta.ok;
+	}
+
+	links = links.filter(link => link.source !== deletar.id && link.target !== deletar.id);
+
+	nodes = nodes.filter(node => node.id !== deletar.id);
+
+	renderizar(nodes, links);
+
+	atualizarListaDeNodes();
+
+	input.value = '';
+
+	// OBS! Se adicionar um novo Nó e removê-lo só funciona depois de recarregar o cache,
+	// e caso o Nó tenha arestas ligadas a ele, ao removê-lo a aplicação crasha
 }
 
 function atualizarListaDeNodes() {

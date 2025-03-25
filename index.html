@@ -17,9 +17,12 @@
 
 		<fieldset id="inputs">
 			<legend>Adicionar Nó</legend>
+			<input id="nameNode" type="text" placeholder="Nome do novo nó..." style="width: 96%; margin-bottom: 10px;">
 			<form onsubmit="adicionarNode()" action="javascript:void(0)">
-				<input id="adicionar" type="text" placeholder="Nome do novo nó....">
-				<button type="submit" onsubmit="">Adicionar</button>
+				<button type="submit" onsubmit="" style="width: 100%;">Adicionar</button>
+			</form>
+			<form onsubmit="deletarNode()" action="javascript:void(0)">
+				<button type="submit" onsubmit="" style="width: 100%;">Deletar</button>
 			</form>
 		</fieldset>
 
