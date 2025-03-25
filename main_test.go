@@ -95,7 +95,7 @@ func TestConjunto(t *testing.T) {
 	e.Conectar(a)
 
 	t.Run("MatrizAdjacencia", func(t *testing.T) {
-		resultado := conjunto.MatrizAdjacencia()
+		resultado, _ := conjunto.MatrizAdjacencia()
 
 		//   a  b  c  d  e  f
 		// a 0  1  1  1  1  1

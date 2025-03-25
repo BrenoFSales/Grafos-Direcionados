@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type D3Node struct {
@@ -195,6 +196,38 @@ func main() {
 			w.WriteHeader(204)
 		default:
 			w.WriteHeader(405)
+		}
+
+	})
+
+	http.HandleFunc("/matriz/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
+		conjuntoSelectionado := r.PathValue("conjunto")
+		if conjuntoSelectionado == "" {
+			panic("vazio")
+		}
+
+		conjunto := exemplos[conjuntoSelectionado]
+
+		rotulos_ := r.URL.Query().Get("rotulo")
+		if conjuntoSelectionado == "" {
+			panic("vazio")
+		}
+		exibirRotulos := rotulos_ == "true"
+
+		matriz, rotulos := conjunto.MatrizAdjacencia()
+
+		for i := range matriz {
+			var linha []string
+			for j := range matriz[i] {
+				var s string
+				if exibirRotulos {
+					s = fmt.Sprintf("%d_{%s,%s}", matriz[i][j], rotulos[i], rotulos[j])
+				} else {
+					s = fmt.Sprintf("%d", matriz[i][j])
+				}
+				linha = append(linha, s)
+			}
+			w.Write([]byte(fmt.Sprintf("%s \\\\\n", strings.Join(linha, " & "))))
 		}
 
 	})

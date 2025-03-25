@@ -128,21 +128,25 @@ func contarOcorrenciasDoMesmoNode(pai, filho *Node) int {
 
 // cria uma matriz de adjacência onde todos os nós são ordenados pelo rótulo em colunas e linhas
 // em ordem alfabética
-func (c conjunto) MatrizAdjacencia() [][]int {
+func (c conjunto) MatrizAdjacencia() ([][]int, []string) {
 	clone := slices.Clone(c)
 	slices.SortFunc(clone, func(a, b *Node) int {
 		return strings.Compare(a.rotulo, b.rotulo)
 	})
-	var retorno = make([][]int, len(clone))
-	for i := range retorno {
-		retorno[i] = make([]int, len(clone))
+	var (
+		rotulos = make([]string, len(clone))
+		matriz  = make([][]int, len(clone))
+	)
+	for i := range matriz {
+		matriz[i] = make([]int, len(clone))
 	}
 	for i := range clone {
+		rotulos[i] = clone[i].rotulo
 		for j := range clone {
-			retorno[i][j] = contarOcorrenciasDoMesmoNode(clone[i], clone[j])
+			matriz[i][j] = contarOcorrenciasDoMesmoNode(clone[i], clone[j])
 		}
 	}
-	return retorno
+	return matriz, rotulos
 }
 
 // cria uma lista de adjacência onde todos os conjuntos são representados pelos seus rótulos, em ordem alfabética,

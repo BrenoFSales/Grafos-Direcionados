@@ -8,6 +8,10 @@
 	<script src="https://d3js.org/d3.v6.min.js"></script>
 	<script src="https://unpkg.com/d3-force@3"></script>
 	<script src="https://unpkg.com/d3-sankey@0.12"></script>
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js"
+		integrity="sha384-Rma6DA2IPUwhNxmrB/7S3Tno0YY7sFu9WSYMCuulLhIqYSGZ2gKCJWIqhBWqMQfh"
+		crossorigin="anonymous"></script>
+
 	<link rel="stylesheet" href="/static/styles.css">
 </head>
 
@@ -56,10 +60,14 @@
 		</fieldset>
 
 		<fieldset id="inputs">
-			<legend>Matrix Adjacência</legend>
-			<form onsubmit="alert(1)">
-				<button type="submit" style="width: 100%">Verificar</button>
-			</form>
+			<legend>Matriz Adjacência</legend>
+			<div style="margin-bottom: 5px;">
+
+				<input type="checkbox" id="exibir-rotulos" value="" style="vertical-align: middle;"
+					onchange="atualizarMatrizAdjacencia()">
+				<label for="exibir-rotulos" style="vertical-align: middle;">Exibir rotulos</label>
+			</div>
+			<button id="matriz-toggle" type="submit" style="width: 100%" onclick="toggleMatrizAdjacencia()">Mostrar</button>
 		</fieldset>
 
 		<fieldset id="inputs">
@@ -70,6 +78,9 @@
 		</fieldset>
 
 	</header>
+	<section class="latex-display">
+		<div id="matriz" class="hidden" style="max-width: 200px; color: white;"></div>
+	</section>
 
 	<main id="grafo-exibicao"></main>
 

@@ -126,8 +126,8 @@ async function adicionarNode() {
 	nodes.push(novo);
 
 	renderizar(nodes, links);
-
 	atualizarListaDeNodes();
+	await atualizarMatrizAdjacencia();
 
 	input.value = '';
 }
@@ -184,11 +184,8 @@ async function deletarAresta() {
 		throw resposta.ok;
 	}
 
-	let index = links.findIndex(({source, target}) => source.id == link.source && target.id == link.target);
-	if (index < 0) {
-		throw index;
-	}
-	links = links.filter((_, i) => i != index);
+	let index = links.findIndex(({ source, target }) => source.id == link.source && target.id == link.target);
+	if (index < 0) { throw index; } links = links.filter((_, i) => i != index);
 
 	renderizar(nodes, links);
 }
@@ -209,6 +206,7 @@ async function conectarNodes() {
 	links.push(link);
 
 	renderizar(nodes, links);
+	await atualizarMatrizAdjacencia();
 }
 
 // isso faz questão de manter salvo o exemplo selecionado para que o usuário
@@ -217,7 +215,7 @@ async function trocarExemplo(evento) {
 
 	const url = new URL(window.location.href);
 
-	// 
+	//
 	let exemploSelecionado = document.querySelector('select#preset').value;
 	let parametroExemploSalvo = url.searchParams.get('exemplo');
 
@@ -240,16 +238,41 @@ async function trocarExemplo(evento) {
 	let { nodes: nodes_, links: links_ } = await resposta.json();
 	nodes = nodes_;
 	links = links_;
+
 	renderizar(nodes, links);
 	atualizarListaDeNodes();
-
-	console.log(exemploSelecionado);
+	atualizarMatrizAdjacencia();
 
 	// atualiza a url para que toda vez que o usuário recarregar a página, o mesmo exemplo será exibido.
-	const parametrosNovos = new URLSearchParams({exemplo: exemploSelecionado}).toString();
+	const parametrosNovos = new URLSearchParams({ exemplo: exemploSelecionado }).toString();
 
 	console.log(parametrosNovos);
 	window.history.replaceState(null, "", `${url.pathname}?${parametrosNovos}`)
+
 }
 
 trocarExemplo();
+
+async function atualizarMatrizAdjacencia() {
+	let exibirRotulos = document.querySelector('#exibir-rotulos');
+	let exemplo = document.querySelector('select#preset');
+	let resposta = await fetch(`/matriz/${exemplo.value}?rotulo=${exibirRotulos.checked}`);
+	if (!resposta.ok) {
+		throw resposta.ok;
+	}
+	let matriz = await resposta.text();
+	let latex = `\\begin{bmatrix}\n${matriz}\n\\end{bmatrix}`;
+	katex.render(latex, document.querySelector('#matriz'), { throwOnError: true, });
+}
+
+async function toggleMatrizAdjacencia() {
+	let matriz = document.querySelector('#matriz');
+	let butao = document.querySelector('#matriz-toggle');
+	matriz.classList.toggle('hidden')
+	if (matriz.classList.contains('hidden')) {
+		butao.textContent = 'Mostrar';
+	} else {
+		butao.textContent = 'Esconder';
+		await atualizarMatrizAdjacencia();
+	}
+}
