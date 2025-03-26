@@ -29,83 +29,106 @@ var links = [
 // D3 usa a referência desses dois objetos para salvar informações essenciais dos nós como posição e etc.
 
 function renderizar(nodes, links) {
+    document.querySelector("#grafo-exibicao").innerHTML = '';
+	const grafoContainer = document.getElementById("grafo-exibicao");
 
-	// Limpa qualquer coisa que tenha sido feito previamente para
-	// recriar o grafo.
-	document.querySelector("#grafo-exibicao").innerHTML = '';
+    const svg = d3.select("#grafo-exibicao").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .call(d3.zoom().on("zoom", (event) => { // implementa o zoom in/out com scroll
+            container.attr("transform", event.transform);
 
-	const svg = d3.select("#grafo-exibicao").append("svg");
-	// .attr("width", width)
-	// .attr("height", height);
+			// Atualiza a malha de fundo conforme o zoom do SVG
+			const zoomLevel = event.transform.k;
+			grafoContainer.style.backgroundSize = `${35 * zoomLevel}px ${35 * zoomLevel}px`;
+        }));
 
-	// Define as setas das arestas
-	svg.append("defs").append("marker")
-		.attr("id", "arrow")
-		.attr("viewBox", "0 -5 10 10")
-		.attr("refX", 18)
-		.attr("refY", 0)
-		.attr("markerWidth", 17)
-		.attr("markerHeight", 17)
-		.attr("orient", "auto")
-		.append("path")
-		.attr("d", "M0,-5L10,0L0,5")
-		.attr("fill", "#9dbaea");
+    const container = svg.append("g");
 
-	// Criação da Simulação (Forças)
-	const simulation = d3.forceSimulation(nodes)
-		.force("link", d3.forceLink(links).id(d => d.id).distance(300))
-		.force("charge", d3.forceManyBody().strength(-60))
-		.force("center", d3.forceCenter(width / 2, height / 2));
+    // Definição das setas das arestas
+    container.append("defs").append("marker")
+        .attr("id", "arrow")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 18)
+        .attr("refY", 0)
+        .attr("markerWidth", 15)
+        .attr("markerHeight", 15)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5L10,0L0,5")
+        .attr("fill", "#9dbaea");
 
-	const link = svg.selectAll(".link")
-		.data(links)
-		.enter().append("line")
-		.attr("class", "link");
+    const simulation = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id(d => d.id).distance(300))
+        .force("charge", d3.forceManyBody().strength(-60))
+        .force("center", d3.forceCenter(width / 2, height / 2));
 
-	const node = svg.selectAll(".node")
-		.data(nodes)
-		.enter().append("g")
-		.attr("class", "node");
+    const link = container.selectAll(".link")
+        .data(links)
+        .enter().append("line")
+        .attr("class", "link");
 
-	// Tamanho dos nós
-	node.append("circle")
-		.attr("r", 30);
+    const node = container.selectAll(".node")
+        .data(nodes)
+        .enter().append("g")
+        .attr("class", "node");
 
-	// Tamanho do texto dentro do nó
-	node.append("text")
-		.text(d => d.id)
-		.attr("dy", 5);
+    node.append("circle").attr("r", 30);
 
-	simulation.on("tick", () => {
-		link
-			.attr("x1", d => d.source.x)
-			.attr("y1", d => d.source.y)
-			.attr("x2", d => d.target.x)
-			.attr("y2", d => d.target.y);
+    node.append("text")
+        .text(d => d.id)
+        .attr("dy", 5);
 
-		node
-			.attr("transform", d => `translate(${d.x},${d.y})`);
-	});
+    simulation.on("tick", () => {
+        link
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
 
-	// Adiciona a física de arraso e repulsão dos nós
-	const drag = d3.drag()
-		.on("start", (event, d) => {
-			if (!event.active) simulation.alphaTarget(0.3).restart();
-			d.fx = d.x;
-			d.fy = d.y;
-		})
-		.on("drag", (event, d) => {
-			d.fx = event.x;
-			d.fy = event.y;
-		})
-		.on("end", (event, d) => {
-			if (!event.active) simulation.alphaTarget(0);
-			d.fx = null;
-			d.fy = null;
-		});
+        node.attr("transform", d => `translate(${d.x},${d.y})`);
+    });
 
-	// Inicializa a mecânica de física
-	node.call(drag);
+    const drag = d3.drag()
+        .on("start", (event, d) => {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        })
+        .on("drag", (event, d) => {
+            d.fx = event.x;
+            d.fy = event.y;
+        })
+        .on("end", (event, d) => {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        });
+
+    node.call(drag);
+
+    // Implementação do arrasto (pan) com botão do meio do mouse
+    let isPanning = false;
+    let startX, startY;
+    
+    svg.on("mousedown", (event) => {
+        if (event.button === 1) { // Botão do meio do mouse
+            isPanning = true;
+            startX = event.clientX;
+            startY = event.clientY;
+        }
+    });
+
+    svg.on("mousemove", (event) => {
+        if (isPanning) {
+            let dx = event.clientX - startX;
+            let dy = event.clientY - startY;
+            container.attr("transform", `translate(${dx},${dy})`);
+        }
+    });
+
+    svg.on("mouseup", () => isPanning = false);
+    svg.on("mouseleave", () => isPanning = false);
 }
 
 async function adicionarNode() {

@@ -14,7 +14,7 @@ body {
 header {
 	position: relative;
 	z-index: 1;
-	background-color: #1c1d2e;
+	background-color: #161724;
 	opacity: 0.9;
 	box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 	display: flex;
@@ -45,15 +45,13 @@ h1 {
 
 /* Visualização do Grafo Direcionado (Dígrafo)*/
 #grafo-exibicao {
-	width: 100%;
-	height: 100vh;
-	background-color: #24263b;
-	position: absolute;
-
-	& svg {
-		width: 100%;
-		height: 100%;
-	}
+    width: 100%;
+    height: 100vh;
+    background-color: #232438;
+    background-image: radial-gradient(circle, #dbdbdb4d 1px, transparent 1px);
+    background-size: 40px 40px; /* Base para ajuste dinâmico */
+    position: absolute;
+    transform-origin: center;
 }
 
 .link {
