@@ -11,11 +11,11 @@ import (
 type conjunto []*Node
 
 type Node struct {
-	conjunto *conjunto
-	rotulo   string
-	id       uuid.UUID
-	filhos   []*Node
-	x, y     float64
+	conjunto *conjunto // Conjunto de todos os vértices do grafo
+	rotulo   string    // "Valor" do nó
+	id       uuid.UUID // Identificador único do nó
+	filhos   []*Node   // Relações do nó
+	x, y     float64   // Posição dos nós na interface ??????
 }
 
 // aresta unidirecional entre dois nós: a -> b.
@@ -39,9 +39,20 @@ func (a *Node) Get(id uuid.UUID) (*Node, error) {
 	}
 }
 
+// TODO: testar
 // grau de um vértice
-func (a *Node) Grau() int {
-	return len(a.filhos)
+func (a *Node) Grau() (int, int) {
+	if a == nil {
+		panic("O nó não pode ser nulo")
+	}
+	var grauSaidaTotal int = len(a.filhos) // As relações que um nó faz são o grau de saída
+	var grauEntradaTotal int = 0
+	for i, node := range *a.conjunto {
+		if node.filhos[i] == a {
+			grauEntradaTotal++ // Obtendo o grau de entrada percorrendo os vértices do grafo e vendo se o nó é referênciado
+		}
+	}
+	return grauEntradaTotal, grauSaidaTotal
 }
 
 // deve remover o primeiro nó caso o haja mais de um com o mesmo id.
@@ -91,6 +102,7 @@ func (c *conjunto) NovoNode(rotulo string) *Node {
 	return node
 }
 
+// Retorna o primeiro nó encontrado
 func (c *conjunto) Get(rotulo string) *Node {
 	idx := slices.IndexFunc(*c, func(x *Node) bool {
 		return x.rotulo == rotulo
@@ -99,7 +111,7 @@ func (c *conjunto) Get(rotulo string) *Node {
 }
 
 func (c conjunto) String() string {
-	return c.String()
+	return c.String() // ???
 }
 
 // cria um novo nó filho pertencendo ao mesmo conjunto que o objeto sendo chamado.
@@ -165,9 +177,23 @@ func (c conjunto) VerticesGrau() map[*Node]int {
 	panic("não implementado!")
 }
 
+// TODO: testar
+// To chutando que essa função deve retornar a quantidade total de graus do digrafo
 // retorna o número máximo do grau de todos os vértices
 func (c conjunto) GrafoGrau() int {
-	panic("não implementado!")
+	var valenciaTotalDigrafo = 0
+	for i := 0; i < len(c); i++ {
+		grauEntrada, grauSaida := c[i].Grau()
+		valenciaTotalDigrafo += grauEntrada + grauSaida
+	}
+	return valenciaTotalDigrafo
+}
+func (a *Node) GrafoGrau() int {
+	if a == nil {
+		panic("O nó não pode ser nulo")
+	}
+	var grauEntradaTotal, grauSaidaTotal int = a.Grau()
+	return grauEntradaTotal + grauSaidaTotal
 }
 
 // verifica se grafo é completo
@@ -175,12 +201,37 @@ func (c conjunto) VerificarCompleto() bool {
 	panic("não implementado!")
 }
 
+// TODO: testar
 // verifica se grafo possuí ao menos um vértice com um laço
 func (c conjunto) VerificarLacos() bool {
-	panic("não implementado!")
+	var possuiLacos bool = false
+	for i := 0; i < len(c); i++ {
+		for j := 0; j < len(c[i].filhos); j++ {
+			if c[i].filhos[j] == c[j].filhos[i] {
+				possuiLacos = true
+			}
+		}
+	}
+	return possuiLacos
 }
 
+// TODO: testar
 // verifica se grafo é um grafo simples
 func (c conjunto) VerificarSimples() bool {
-	panic("não implementado!")
+	var eCompleto = false
+	var possuiLacos = c.VerificarLacos()
+	var possuiArestasParalelas = false
+	for i := 0; i < len(c); i++ {
+		for j := 0; j < len(c[i].filhos); j++ {
+			for k := j + 1; k < len(c[i].filhos); k++ {
+				if c[i].filhos[j] == c[i].filhos[k] || c[i].filhos[j] == c[k].filhos[i] {
+					possuiArestasParalelas = true
+				}
+			}
+		}
+	}
+	if !possuiLacos && !possuiArestasParalelas {
+		eCompleto = true
+	}
+	return eCompleto
 }
