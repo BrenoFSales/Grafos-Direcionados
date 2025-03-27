@@ -1,7 +1,6 @@
 package main
 
 import (
-	"maps"
 	"reflect"
 	"testing"
 )
@@ -40,21 +39,25 @@ func TestNode(t *testing.T) {
 		t.Fatalf("nó resultado não é o esperado. resultado: %p, esperado: %p", resultado, esperado)
 	}
 
-	a.Remover(c.id)
-
+	c.Conectar(a)
 	a.Conectar(a)
 	a.Conectar(a)
 
-	a.Remover(a.id)
+	grauEntradaResultado, grauSaidaResultado := a.Grau()
+	grauEntradaEsperado, grauSaidaEsperado := 3, 3
 
-	grauResultado := a.Grau()
-	grauEsperado := 1
-
-	if grauResultado != grauEsperado {
+	if grauEntradaEsperado != grauEntradaResultado {
 		t.Log(a)
 		t.Fatalf(
-			"Grau nó resultado não é o esperado. resultado: %v, esperado: %v",
-			grauResultado, grauEsperado,
+			"grauEntradaEsperado (%d) != grauEntradaResultado (%d)",
+			grauEntradaEsperado, grauEntradaResultado,
+		)
+	}
+	if grauSaidaEsperado != grauSaidaResultado {
+		t.Log(a)
+		t.Fatalf(
+			"grauSaidaEsperado (%d) != grauSaidaResultado (%d)",
+			grauSaidaEsperado, grauSaidaResultado,
 		)
 	}
 }
@@ -140,17 +143,17 @@ func TestConjunto(t *testing.T) {
 	// 	}
 	// })
 
-	t.Run("VerticesGrau", func(t *testing.T) {
-		resultado := conjunto.VerticesGrau()
-		esperado := map[*Node]int{a: 5, b: 4, c: 3, d: 0, e: 2, f: 3}
-
-		if !maps.Equal(resultado, esperado) {
-			t.Fatalf(
-				"vertices do grau retornados não são os esperados.\nresultado: %#v\nesperado: %#v",
-				resultado, esperado,
-			)
-		}
-	})
+	// t.Run("VerticesGrau", func(t *testing.T) {
+	// 	resultado := conjunto.VerticesGrau()
+	// 	esperado := map[*Node]int{a: 5, b: 4, c: 3, d: 0, e: 2, f: 3}
+	//
+	// 	if !maps.Equal(resultado, esperado) {
+	// 		t.Fatalf(
+	// 			"vertices do grau retornados não são os esperados.\nresultado: %#v\nesperado: %#v",
+	// 			resultado, esperado,
+	// 		)
+	// 	}
+	// })
 
 	t.Run("GrafoGrau", func(t *testing.T) {
 		resultado := conjunto.GrafoGrau()

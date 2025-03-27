@@ -39,17 +39,17 @@ func (a *Node) Get(id uuid.UUID) (*Node, error) {
 	}
 }
 
-// TODO: testar
-// grau de um vértice
-func (a *Node) Grau() (int, int) {
-	if a == nil {
-		panic("O nó não pode ser nulo")
-	}
-	var grauSaidaTotal int = len(a.filhos) // As relações que um nó faz são o grau de saída
-	var grauEntradaTotal int = 0
-	for i, node := range *a.conjunto {
-		if node.filhos[i] == a {
-			grauEntradaTotal++ // Obtendo o grau de entrada percorrendo os vértices do grafo e vendo se o nó é referênciado
+// graus de saída e entrada de um vértice
+func (a *Node) Grau() (grauEntradaTotal int, grauSaidaTotal int) {
+	conjunto := *a.conjunto
+
+	grauSaidaTotal = len(a.filhos)
+
+	for i := range conjunto {
+		for _, f := range conjunto[i].filhos {
+			if f == a {
+				grauEntradaTotal++
+			}
 		}
 	}
 	return grauEntradaTotal, grauSaidaTotal
@@ -236,12 +236,6 @@ func (c conjunto) VerificarArvore(raiz *Node) (
 	}
 
 	return
-}
-
-// retorna um map onde cada chave representa um nó do conjunto
-// e cada valor o número de grau da nó chave.
-func (c conjunto) VerticesGrau() map[*Node]int {
-	panic("não implementado!")
 }
 
 // TODO: testar
