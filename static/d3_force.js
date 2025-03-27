@@ -314,12 +314,49 @@ function atualizarListaDeNodes() {
 	}
 }
 
+async function atualizarGrausNos() {
+	try{
+		let exemplo = document.querySelector('select#preset');
+	let resposta = await fetch(`/grau/${exemplo.value}`);
+	if (!resposta.ok) {
+		throw resposta.ok;
+	}
+	let graus = await resposta.json();
+
+	let latex = "\\begin{array}{l}\n";
+	for (let rotulo in graus) {
+		let g = graus[rotulo];
+		latex += `${rotulo}: \\text{entrada } ${g.entrada}, \\text{saída } ${g.saida} \\\\\n`;
+	}
+	latex += "\\end{array}";
+
+	katex.render(latex, document.querySelector('#graus-nos'), { throwOnError: true });
+	} catch (e) {
+		console.error("Erro ao atualizar graus dos nós:", e);
+	}
+	
+}
+
+async function toggleGrausNos() {
+	let grau = document.querySelector('#graus-nos');
+	let butao = document.querySelector('#grau-toggle');
+	grau.classList.toggle('hidden');
+	if (grau.classList.contains('hidden')) {
+		butao.textContent = 'Mostrar';
+	} else {
+		butao.textContent = 'Esconder';
+		await atualizarGrausNos();
+	}
+}
+
 
 async function atualizar() {
 	renderizar(nodes, links);
 	atualizarListaDeNodes();
 	await atualizarMatrizAdjacencia();
 	await atualizarListaAdjacencia();
+	await atualizarGrausNos();
+
 }
 
 

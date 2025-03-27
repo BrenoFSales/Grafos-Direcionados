@@ -47,9 +47,11 @@ func (a *Node) Grau() (int, int) {
 	}
 	var grauSaidaTotal int = len(a.filhos) // As relações que um nó faz são o grau de saída
 	var grauEntradaTotal int = 0
-	for i, node := range *a.conjunto {
-		if node.filhos[i] == a {
-			grauEntradaTotal++ // Obtendo o grau de entrada percorrendo os vértices do grafo e vendo se o nó é referênciado
+	for _, node := range *a.conjunto {
+		for _, filho := range node.filhos {
+			if filho == a {
+				grauEntradaTotal++
+			}
 		}
 	}
 	return grauEntradaTotal, grauSaidaTotal
