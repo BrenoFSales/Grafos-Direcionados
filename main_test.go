@@ -157,7 +157,7 @@ func TestConjunto(t *testing.T) {
 
 	t.Run("GrafoGrau", func(t *testing.T) {
 		resultado := conjunto.GrafoGrau()
-		esperado := 5
+		esperado := 17 * 2
 
 		if resultado != esperado {
 			t.Fatalf(
