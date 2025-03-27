@@ -169,28 +169,28 @@ func TestVerificarArvore(t *testing.T) {
 	conjunto := NovoConjunto()
 
 	var (
-		a = conjunto.NovoNode("1")
-		b = a.NovoNode("1")
-		c = a.NovoNode("1")
+		a = conjunto.NovoNode("a")
+		b = a.NovoNode("b")
+		c = a.NovoNode("c")
 
-		d = b.NovoNode("2")
-		e = b.NovoNode("2")
+		d = b.NovoNode("d")
+		e = b.NovoNode("e")
 
-		f = c.NovoNode("2")
-		g = c.NovoNode("2")
+		f = c.NovoNode("f")
+		g = c.NovoNode("g")
 
-		_ = d.NovoNode("3")
-		_ = d.NovoNode("3")
-		_ = e.NovoNode("3")
-		_ = e.NovoNode("3")
+		_ = d.NovoNode("x1")
+		_ = d.NovoNode("x2")
+		_ = e.NovoNode("x3")
+		_ = e.NovoNode("x4")
 
-		_ = f.NovoNode("3")
-		_ = f.NovoNode("3")
-		_ = g.NovoNode("3")
-		h = g.NovoNode("3")
+		_ = f.NovoNode("x5")
+		_ = f.NovoNode("x6")
+		_ = g.NovoNode("x7")
+		h = g.NovoNode("h")
 	)
 
-	arvore, binaria, cheia, completa := conjunto.VerificarArvore()
+	arvore, binaria, cheia, completa := conjunto.VerificarArvore(a)
 	if !arvore {
 		t.Log("verificação retornada não é a esperada: grafo é uma árvore")
 		t.Fail()
@@ -203,15 +203,16 @@ func TestVerificarArvore(t *testing.T) {
 		t.Log("verificação retornada não é a esperada: árvore é cheia")
 		t.Fail()
 	}
-	if completa {
-		t.Fatal("verificação retornada não é a esperada: árvore não é completa")
+	if !completa {
+		t.Log("verificação retornada não é a esperada: árvore é completa")
+		t.Fail()
 	}
 	if t.Failed() {
 		t.FailNow()
 	}
 
-	g.Remover(h.id)
-	arvore, binaria, cheia, completa = conjunto.VerificarArvore()
+	conjunto.Remover(h.rotulo)
+	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a)
 	if !arvore {
 		t.Log("verificação retornada não é a esperada: grafo é uma árvore")
 		t.Fail()
@@ -221,19 +222,53 @@ func TestVerificarArvore(t *testing.T) {
 		t.Fail()
 	}
 	if cheia {
-		t.Log("verificação retornada não é a esperada: árvore não é mais cheia")
+		t.Log("verificação retornada não é a esperada: árvore não é cheia")
 		t.Fail()
 	}
 	if !completa {
-		t.Log("verificação retornada não é a esperada: árvore agora é completa")
+		t.Log("verificação retornada não é a esperada: árvore é completa")
 		t.Fail()
 	}
 	if t.Failed() {
 		t.FailNow()
 	}
 
-	a.Remover(b.id)
-	arvore, binaria, cheia, completa = conjunto.VerificarArvore()
+	conjunto.Remover("x5")
+	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a)
+	if !arvore {
+		t.Log("verificação retornada não é a esperada: grafo é uma árvore")
+		t.Fail()
+	}
+	if !binaria {
+		t.Log("verificação retornada não é a esperada: árvore é binária")
+		t.Fail()
+	}
+	if cheia {
+		t.Log("verificação retornada não é a esperada: árvore não é cheia")
+		t.Fail()
+	}
+	if completa {
+		t.Log("verificação retornada não é a esperada: árvore não é completa")
+		t.Fail()
+	}
+	if t.Failed() {
+		t.FailNow()
+	}
+
+	conjunto = NovoConjunto()
+
+	a = conjunto.NovoNode("a")
+	c = a.NovoNode("c")
+
+	f = c.NovoNode("f")
+	g = c.NovoNode("g")
+
+	_ = f.NovoNode("x5")
+	_ = f.NovoNode("x6")
+	_ = g.NovoNode("x7")
+	_ = g.NovoNode("h")
+
+	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a)
 	if !arvore {
 		t.Log("verificação retornada não é a esperada: grafo é uma árvore")
 		t.Fail()
@@ -247,11 +282,31 @@ func TestVerificarArvore(t *testing.T) {
 		t.Fail()
 	}
 	if completa {
-		t.Log("verificação retornada não é a esperada: árvore não mais é completa")
+		t.Log("verificação retornada não é a esperada: árvore não é completa")
 		t.Fail()
 	}
 	if t.Failed() {
 		t.FailNow()
+	}
+
+	conjunto = NovoConjunto()
+	conjunto.NovoNode("a")
+	conjunto.NovoNode("b")
+
+	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a)
+	if arvore || binaria || cheia || completa {
+		t.Log("verificação retornada não é a esperada: grafo não é uma árvore")
+		t.Fail()
+	}
+
+	conjunto = NovoConjunto()
+	a = conjunto.NovoNode("a")
+	a.NovoNode("b").NovoNode("c").Conectar(a)
+
+	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a)
+	if arvore || binaria || cheia || completa {
+		t.Log("verificação retornada não é a esperada: grafo não é uma árvore")
+		t.Fail()
 	}
 }
 

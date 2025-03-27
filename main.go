@@ -165,10 +165,77 @@ func (c conjunto) ListaAdjacencia() conjunto {
 	return c
 }
 
-func (c conjunto) VerificarArvore() (GrafoArvore bool, ArvoreBinaria bool, ArvoreCheia bool, ArvoreCompleta bool) {
+func (c conjunto) VerificarArvore(raiz *Node) (
+	GrafoArvore bool, ArvoreBinaria bool, ArvoreCheia bool, ArvoreCompleta bool,
+) {
 	// não fica claro no documento quais tipos de árvores ele quer.
 	// talvez árvore binária seja redundante.
-	panic("não implementado!")
+
+	GrafoArvore = true
+	ArvoreBinaria = true
+	ArvoreCheia = true
+	ArvoreCompleta = true
+
+	if len(c) == 0 {
+		return
+	}
+	var (
+		nivelProximoNodes []*Node
+		nivelAtualNodes   = []*Node{raiz}
+		visitados         []*Node
+		niveis            [][]*Node
+	)
+
+	for len(nivelAtualNodes) > 0 {
+		nivelProximoNodes = []*Node{}
+		var graus []int
+		for _, n := range nivelAtualNodes {
+			// grafo é ciclico. não é uma árvore.
+			if slices.Index(visitados, n) > -1 {
+				return false, false, false, false
+			}
+			if len(n.filhos) != 2 && len(n.filhos) != 0 {
+				ArvoreCheia = false
+			}
+			nivelProximoNodes = append(nivelProximoNodes, n.filhos...)
+			visitados = append(visitados, n)
+			graus = append(graus, len(n.filhos))
+		}
+		niveis = append(niveis, nivelAtualNodes)
+		nivelAtualNodes = nivelProximoNodes
+	}
+	// existe algum nó que não é alcançável através do nó raiz. grafo não é uma árvore
+	if len(c) != len(visitados) {
+		return false, false, false, false
+	}
+
+	nivelMaximo := len(niveis) - 1
+
+	for i := range nivelMaximo {
+		if len(niveis[i]) != 1<<i {
+			ArvoreCompleta = false
+			return
+		}
+	}
+
+	// demorei um dia para fazer isso.
+	for i := range niveis {
+		contiguo := true
+		ultimoNivel := i+1 == len(niveis)
+		for j := range niveis[i] {
+			l := len(niveis[i][j].filhos)
+			if contiguo {
+				contiguo = contiguo && l == 2
+			} else if l > 0 {
+				if !ultimoNivel {
+					ArvoreCompleta = false
+					return
+				}
+			}
+		}
+	}
+
+	return
 }
 
 // retorna um map onde cada chave representa um nó do conjunto
