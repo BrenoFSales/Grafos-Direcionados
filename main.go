@@ -262,18 +262,14 @@ func (c conjunto) VerificarCompleto() bool {
 	panic("não implementado!")
 }
 
-// TODO: testar
 // verifica se grafo possuí ao menos um vértice com um laço
 func (c conjunto) VerificarLacos() bool {
-	var possuiLacos bool = false
-	for i := 0; i < len(c); i++ {
-		for j := 0; j < len(c[i].filhos); j++ {
-			if c[i].filhos[j] == c[j].filhos[i] {
-				possuiLacos = true
-			}
+	for _, n := range c {
+		if slices.Index(n.filhos, n) > -1 {
+			return true
 		}
 	}
-	return possuiLacos
+	return false
 }
 
 // TODO: testar
