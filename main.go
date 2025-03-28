@@ -39,6 +39,7 @@ func (a *Node) Get(id uuid.UUID) (*Node, error) {
 	}
 }
 
+
 // graus de saída e entrada de um vértice
 func (a *Node) Grau() (grauEntradaTotal int, grauSaidaTotal int) {
 	conjunto := *a.conjunto

@@ -76,6 +76,9 @@
 		</fieldset>
 
 		<fieldset id="inputs">
+			<legend>Grau dos Nós</legend>
+			<button id="grau-toggle" type="submit" style="width: 100%" onclick="toggleGrausNos()">Mostrar</button>
+		</fieldset>
 			<legend>Tipos do grafo</legend>
 			<label style="" for="arvore-raiz">Nó raiz da árvore:</label>
 			<select id="arvore-raiz" style="display: block;">
@@ -98,6 +101,8 @@
 	<section class="latex-display">
 		<div id="matriz" class="hidden" style="max-width: 200px; color: white;"></div>
 		<div id="lista" class="hidden" style="max-width: 200px; color: white;"></div>
+		<div id="graus-nos" class="hidden" style="max-width: 200px; color: white;"></div>
+
 	</section>
 
 	<main id="grafo-exibicao"></main>
