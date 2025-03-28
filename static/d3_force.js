@@ -276,7 +276,7 @@ async function toggleMatrizAdjacencia() {
 	let butao = document.querySelector('#matriz-toggle');
 	matriz.classList.toggle('hidden')
 	if (matriz.classList.contains('hidden')) {
-		butao.textContent = 'Mostrar';
+		butao.textContent = 'Exibir';
 	} else {
 		butao.textContent = 'Esconder';
 		await atualizarMatrizAdjacencia();
@@ -299,7 +299,7 @@ async function toggleListaAdjacencia() {
 	let butao = document.querySelector('#lista-toggle');
 	lista.classList.toggle('hidden')
 	if (lista.classList.contains('hidden')) {
-		butao.textContent = 'Mostrar';
+		butao.textContent = 'Exibir';
 	} else {
 		butao.textContent = 'Esconder';
 		await atualizarListaAdjacencia();
@@ -347,7 +347,7 @@ async function toggleGrausNos() {
 	let butao = document.querySelector('#grau-toggle');
 	grau.classList.toggle('hidden');
 	if (grau.classList.contains('hidden')) {
-		butao.textContent = 'Mostrar';
+		butao.textContent = 'Exibir';
 	} else {
 		butao.textContent = 'Esconder';
 		await atualizarGrausNos();
@@ -447,7 +447,7 @@ async function toggleGrauTotal() {
 	let butao = document.querySelector('#grau-total-toggle');
 	grau.classList.toggle('hidden');
 	if (grau.classList.contains('hidden')) {
-		butao.textContent = 'Mostrar';
+		butao.textContent = 'Exibir';
 	} else {
 		butao.textContent = 'Esconder';
 		await atualizarGrauTotal();
@@ -465,6 +465,18 @@ async function atualizar() {
 	await atualizarTiposDoGrafo();
 	await atualizarGrauTotal();
 
+}
+
+
+function creditos() {
+	let creditos = document.querySelector('#creditos');
+	let butao = document.querySelector('#creditos-toggle');
+	creditos.classList.toggle('hidden')
+	if (creditos.classList.contains('hidden')) {
+		butao.textContent = 'Exibir';
+	} else {
+		butao.textContent = 'Esconder';
+	}
 }
 
 

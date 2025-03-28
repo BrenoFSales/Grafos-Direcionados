@@ -67,22 +67,22 @@
 					onchange="atualizarMatrizAdjacencia()">
 				<label for="exibir-rotulos" style="vertical-align: middle;">Exibir rótulos</label>
 			</div>
-			<button id="matriz-toggle" type="submit" style="width: 100%" onclick="toggleMatrizAdjacencia()">Mostrar</button>
+			<button id="matriz-toggle" type="submit" style="width: 100%" onclick="toggleMatrizAdjacencia()">Exibir</button>
 		</fieldset>
 
 		<fieldset id="inputs">
 			<legend>Lista Adjacência</legend>
-			<button id="lista-toggle" type="submit" style="width: 100%" onclick="toggleListaAdjacencia()">Mostrar</button>
+			<button id="lista-toggle" type="submit" style="width: 100%" onclick="toggleListaAdjacencia()">Exibir</button>
 		</fieldset>
 
 		<fieldset id="inputs">
 			<legend>Grau dos Nós</legend>
-			<button id="grau-toggle" type="submit" style="width: 100%" onclick="toggleGrausNos()">Mostrar</button>
+			<button id="grau-toggle" type="submit" style="width: 100%" onclick="toggleGrausNos()">Exibir</button>
 		</fieldset>
 
 		<fieldset id="inputs">
 			<legend>Grau Total</legend>
-			<button id="grau-total-toggle" type="submit" style="width: 100%" onclick="toggleGrauTotal()">Mostrar</button>
+			<button id="grau-total-toggle" type="submit" style="width: 100%" onclick="toggleGrauTotal()">Exibir</button>
 		</fieldset>
 
 		<fieldset id="inputs">
@@ -113,14 +113,30 @@
 			</ul>
 		</fieldset>
 
+		<fieldset id="inputs">
+			<legend>Créditos</legend>
+			<button id="creditos-toggle" type="submit" style="width: 100%" onclick="creditos()">Exibir</button>
+		</fieldset>
 	</header>
+
 	<section class="latex-display">
 		<div id="matriz" class="hidden" style="max-width: 200px; color: white;"></div>
 		<div id="lista" class="hidden" style="max-width: 200px; color: white;"></div>
 		<div id="graus-nos" class="hidden" style="max-width: 200px; color: white;"></div>
 		<div id="grau-total" class="hidden" style="max-width: 200px; color: white;"></div>
-
-
+		<div id="creditos" class="hidden" style="color: white; font-size: 20px; font-family: serif; max-width: 350px;">
+			<h5>Equipe:</h5>
+			<ul>
+				<li>Breno Ferreira</li>
+				<li>Daniel Augusto</li>
+				<li>Vinicius Teixeira</li>
+				<li>Raphael Braian</li>
+				<li>Daniel Henrique</li>
+			</ul>
+			<h5 style="margin-bottom: 0;">Frase motivacional:</h5>
+			<div>A essência do conhecimento consiste em aplicá-lo, uma vez possuído.</div>
+			<div>Confúcio</div>
+		</div>
 	</section>
 
 	<main id="grafo-exibicao"></main>
