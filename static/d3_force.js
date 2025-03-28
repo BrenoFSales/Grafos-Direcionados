@@ -426,6 +426,34 @@ async function atualizarTiposDoGrafo() {
 	tipoCheia.classList.remove(f(!cheia));
 }
 
+async function atualizarGrauTotal() {
+	try {
+		let exemplo = document.querySelector('select#preset');
+		let resposta = await fetch(`/grau-total/${exemplo.value}`);
+		if (!resposta.ok) {
+			throw resposta.status;
+		}
+		let { grau_total } = await resposta.json();
+
+		let latex = `\\text{Grau total do grafo: } ${grau_total}`;
+		katex.render(latex, document.querySelector('#grau-total'), { throwOnError: true });
+	} catch (e) {
+		console.error("Erro ao obter grau total:", e);
+	}
+}
+
+async function toggleGrauTotal() {
+	let grau = document.querySelector('#grau-total');
+	let butao = document.querySelector('#grau-total-toggle');
+	grau.classList.toggle('hidden');
+	if (grau.classList.contains('hidden')) {
+		butao.textContent = 'Mostrar';
+	} else {
+		butao.textContent = 'Esconder';
+		await atualizarGrauTotal();
+	}
+}
+
 
 async function atualizar() {
 	renderizar(nodes, links);
@@ -435,6 +463,8 @@ async function atualizar() {
 	await atualizarGrausNos();
 	atualizarSelectArvoreRaiz();
 	await atualizarTiposDoGrafo();
+	await atualizarGrauTotal();
+
 }
 
 

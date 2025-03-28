@@ -411,6 +411,50 @@ func main() {
 
 	http.HandleFunc("/tipo/{conjunto}", buscarConjuntoMiddleware(tipos))
 
+	http.HandleFunc("/grau-total/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
+		conjuntoSelecionado := r.PathValue("conjunto")
+		if conjuntoSelecionado == "" {
+			http.Error(w, "Conjunto não especificado", http.StatusBadRequest)
+			return
+		}
+	
+		conjunto := exemplos[conjuntoSelecionado]
+		if conjunto == nil {
+			http.Error(w, "Conjunto não encontrado", http.StatusNotFound)
+			return
+		}
+	
+		grauEntrada := make(map[string]map[string]bool)
+		grauSaida := make(map[string]map[string]bool)
+	
+		for _, origem := range *conjunto {
+			if grauSaida[origem.rotulo] == nil {
+				grauSaida[origem.rotulo] = make(map[string]bool)
+			}
+			for _, destino := range origem.filhos {
+				grauSaida[origem.rotulo][destino.rotulo] = true
+	
+				if grauEntrada[destino.rotulo] == nil {
+					grauEntrada[destino.rotulo] = make(map[string]bool)
+				}
+				grauEntrada[destino.rotulo][origem.rotulo] = true
+			}
+		}
+	
+		total := 0
+		for _, entradas := range grauEntrada {
+			total += len(entradas)
+		}
+		for _, saidas := range grauSaida {
+			total += len(saidas)
+		}
+	
+		resp := map[string]int{"grau_total": total}
+	
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(resp)
+	})
+
 	fmt.Println("http://0.0.0.0:7373")
 	log.Fatal(http.ListenAndServe("0.0.0.0:7373", logging(http.DefaultServeMux)))
 }
