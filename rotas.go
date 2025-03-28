@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/gorilla/sessions"
 )
 
 type D3Node struct {
@@ -23,6 +25,14 @@ type D3NodeLink struct {
 	Nodes []D3Node `json:"nodes"`
 	Links []D3Link `json:"links"`
 }
+
+type exemploSelecao map[string]*conjunto
+
+type handlerFunc func(http.ResponseWriter, *http.Request, *conjunto)
+
+var (
+	store = sessions.NewCookieStore([]byte("something-very-secret"))
+)
 
 func paraD3(conjunto *conjunto) D3NodeLink {
 
@@ -43,8 +53,6 @@ func paraD3(conjunto *conjunto) D3NodeLink {
 	}
 	return saida
 }
-
-type exemploSelecao map[string]*conjunto
 
 func inicializarExemplos() map[string]*conjunto {
 	principal := NovoConjunto()
@@ -117,242 +125,272 @@ func buscarExemplos(_ http.ResponseWriter, _ *http.Request) exemploSelecao {
 	return exemplos
 }
 
-func main() {
+func conexaoNodes(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
+	bytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+	var entrada D3Link
 
-	http.HandleFunc("/link/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
+	if err = json.Unmarshal(bytes, &entrada); err != nil {
+		panic(err)
+	}
 
-		exemplos := buscarExemplos(w, r)
-		conjunto := buscarConjunto(exemplos, r)
+	if entrada.Source == "" || entrada.Target == "" {
+		panic("vazio")
+	}
+	source := conjunto.Get(entrada.Source)
+	target := conjunto.Get(entrada.Target)
 
+	switch r.Method {
+	case "POST":
+		source.Conectar(target)
+		w.WriteHeader(204)
+	case "DELETE":
+		source.Remover(target.id)
+		w.WriteHeader(204)
+	default:
+		w.WriteHeader(405)
+	}
+}
+func nodes(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
+
+	switch r.Method {
+	case "GET":
+		saida := paraD3(conjunto)
+
+		bytes, err := json.Marshal(saida)
+
+		if err != nil {
+			panic(err)
+		}
+
+		_, _ = w.Write(bytes)
+	case "POST":
 		bytes, err := io.ReadAll(r.Body)
 		if err != nil {
 			panic(err)
 		}
-		var entrada D3Link
+		var entrada D3Node
 
 		if err = json.Unmarshal(bytes, &entrada); err != nil {
 			panic(err)
 		}
-
-		if entrada.Source == "" || entrada.Target == "" {
+		if entrada.Id == "" {
 			panic("vazio")
 		}
-		source := conjunto.Get(entrada.Source)
-		target := conjunto.Get(entrada.Target)
 
-		switch r.Method {
-		case "POST":
-			source.Conectar(target)
-			w.WriteHeader(204)
-		case "DELETE":
-			source.Remover(target.id)
-			w.WriteHeader(204)
-		default:
-			w.WriteHeader(405)
+		conjunto.NovoNode(entrada.Id)
+
+		w.WriteHeader(204)
+
+	case "DELETE":
+		bytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
 		}
 
-	})
+		var entrada D3Node
+
+		if err = json.Unmarshal(bytes, &entrada); err != nil {
+			panic(err)
+		}
+		if entrada.Id == "" {
+			panic("vazio")
+		}
+
+		conjunto.Remover(entrada.Id)
+
+		w.WriteHeader(204)
+	default:
+		w.WriteHeader(405)
+	}
+
+}
+
+func matriz(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
+
+	rotulos_ := r.URL.Query().Get("rotulo")
+	if rotulos_ == "" {
+		panic("vazio")
+	}
+	exibirRotulos := rotulos_ == "true"
+
+	matriz, rotulos := conjunto.MatrizAdjacencia()
+
+	for i := range matriz {
+		var linha []string
+		for j := range matriz[i] {
+			var s string
+			if exibirRotulos {
+				s = fmt.Sprintf("%d_{%s,%s}", matriz[i][j], rotulos[i], rotulos[j])
+			} else {
+				s = fmt.Sprintf("%d", matriz[i][j])
+			}
+			linha = append(linha, s)
+		}
+		fmt.Fprintf(w, "%s \\\\\n", strings.Join(linha, " & "))
+	}
+
+}
+
+func buscarConjuntoMiddleware(f handlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		conjunto := buscarConjunto(exemplos, r)
+
+		f(w, r, conjunto)
+	}
+}
+
+func lista(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
+
+	// cria a representação em latex de uma lista de adjacência.
+	// o resultado é sempre algo parecido com isso:
+	//
+	// \begin{array}{l}
+	//	1: 2 \\
+	// 	2: 1, 3 \\
+	// 	3: 2 \\
+	// \end{array}
+
+	// tamanhoStringMaximo := 0
+	// for _, node := range *conjunto {
+	// 	tamanhoStringMaximo = max(tamanhoStringMaximo, len(node.rotulo))
+	// }
+
+	fmt.Fprintf(w, "\\begin{array}{l}\n")
+	for _, node := range *conjunto {
+		var s []string
+		for _, filho := range node.filhos {
+			s = append(s, filho.rotulo)
+		}
+		fmt.Fprintf(w, "%s: %s \\\\\n", node.rotulo, strings.Join(s, ", "))
+	}
+	fmt.Fprintf(w, "\\end{array}\n")
+}
+
+func grau(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
+
+	resultado := make(map[string]map[string]int)
+
+	for _, node := range *conjunto {
+		entrada, saida := node.Grau()
+		resultado[node.rotulo] = map[string]int{
+			"entrada": entrada,
+			"saida":   saida,
+		}
+	}
+
+	bytes, err := json.MarshalIndent(resultado, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(bytes)
+}
+
+func tipos(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
+
+	type tipos struct {
+		Arvore        bool `json:"arvore"`
+		Binaria       bool `json:"binaria"`
+		Cheia         bool `json:"cheia"`
+		Completa      bool `json:"completa"`
+		GrafoCompleto bool `json:"gcompleto"`
+		Lacos         bool `json:"lacos"`
+		Simples       bool `json:"simples"`
+	}
+
+	var t tipos
+
+	nodeRaizRotulo := r.URL.Query().Get("raiz")
+
+	possuiLacos := conjunto.VerificarLacos()
+	simples := conjunto.VerificarSimples()
+	completo := conjunto.VerificarCompleto()
+
+	if nodeRaizRotulo == "" {
+		t = tipos{
+			Lacos:         possuiLacos,
+			Simples:       simples,
+			GrafoCompleto: completo,
+		}
+	} else {
+
+		raiz := conjunto.Get(nodeRaizRotulo)
+		considerarSubgrafo := r.URL.Query().Get("subgrafo") == "true"
+
+		GrafoArvore, ArvoreBinaria, ArvoreCheia, ArvoreCompleta :=
+			conjunto.VerificarArvore(
+				raiz,
+				considerarSubgrafo,
+			)
+
+		t = tipos{
+			Arvore:        GrafoArvore,
+			Binaria:       ArvoreBinaria,
+			Cheia:         ArvoreCheia,
+			Completa:      ArvoreCompleta,
+			Lacos:         possuiLacos,
+			GrafoCompleto: completo,
+			Simples:       simples,
+		}
+	}
+	bytes, err := json.Marshal(t)
+	if err != nil {
+		panic(err)
+	}
+	w.Write(bytes)
+	return
+
+}
+
+// func buscarConjuntoMiddleware(f handlerFunc) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		// Get a session. Get() always returns a session, even if empty.
+// 		session, err := store.Get(r, "session_id")
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+//
+// 		id := session.Values["id"]
+// 		if id == nil {
+// 			session.Values["id"] = inicializarExemplos()
+// 		}
+// 		exemplos, ok := id.(exemploSelecao)
+// 		if !ok {
+// 			exemplos = inicializarExemplos()
+// 			session.Values["id"] = exemplos
+// 		}
+//
+// 		conjunto := buscarConjunto(exemplos, r)
+//
+// 		err = session.Save(r, w)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+//
+// 		f(w, r, conjunto)
+// 	}
+// }
+
+func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("./")))
 
-	http.HandleFunc("/node/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/link/{conjunto}", buscarConjuntoMiddleware(conexaoNodes))
 
-		exemplos := buscarExemplos(w, r)
-		conjunto := buscarConjunto(exemplos, r)
+	http.HandleFunc("/node/{conjunto}", buscarConjuntoMiddleware(nodes))
 
-		switch r.Method {
-		case "GET":
-			saida := paraD3(conjunto)
+	http.HandleFunc("/matriz/{conjunto}", buscarConjuntoMiddleware(matriz))
 
-			bytes, err := json.Marshal(saida)
+	http.HandleFunc("/lista/{conjunto}", buscarConjuntoMiddleware(lista))
 
-			if err != nil {
-				panic(err)
-			}
+	http.HandleFunc("/grau/{conjunto}", buscarConjuntoMiddleware(grau))
 
-			_, _ = w.Write(bytes)
-		case "POST":
-			bytes, err := io.ReadAll(r.Body)
-			if err != nil {
-				panic(err)
-			}
-			var entrada D3Node
-
-			if err = json.Unmarshal(bytes, &entrada); err != nil {
-				panic(err)
-			}
-			if entrada.Id == "" {
-				panic("vazio")
-			}
-
-			conjunto.NovoNode(entrada.Id)
-
-			w.WriteHeader(204)
-
-		case "DELETE":
-			bytes, err := io.ReadAll(r.Body)
-			if err != nil {
-				panic(err)
-			}
-
-			var entrada D3Node
-
-			if err = json.Unmarshal(bytes, &entrada); err != nil {
-				panic(err)
-			}
-			if entrada.Id == "" {
-				panic("vazio")
-			}
-
-			conjunto.Remover(entrada.Id)
-
-			w.WriteHeader(204)
-		default:
-			w.WriteHeader(405)
-		}
-
-	})
-
-	http.HandleFunc("/matriz/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
-
-		exemplos := buscarExemplos(w, r)
-		conjunto := buscarConjunto(exemplos, r)
-
-		rotulos_ := r.URL.Query().Get("rotulo")
-		if rotulos_ == "" {
-			panic("vazio")
-		}
-		exibirRotulos := rotulos_ == "true"
-
-		matriz, rotulos := conjunto.MatrizAdjacencia()
-
-		for i := range matriz {
-			var linha []string
-			for j := range matriz[i] {
-				var s string
-				if exibirRotulos {
-					s = fmt.Sprintf("%d_{%s,%s}", matriz[i][j], rotulos[i], rotulos[j])
-				} else {
-					s = fmt.Sprintf("%d", matriz[i][j])
-				}
-				linha = append(linha, s)
-			}
-			fmt.Fprintf(w, "%s \\\\\n", strings.Join(linha, " & "))
-		}
-
-	})
-
-	http.HandleFunc("/lista/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
-
-		exemplos := buscarExemplos(w, r)
-		conjunto := buscarConjunto(exemplos, r)
-
-		// cria a representação em latex de uma lista de adjacência.
-		// o resultado é sempre algo parecido com isso:
-		//
-		// \begin{array}{l}
-		//	1: 2 \\
-		// 	2: 1, 3 \\
-		// 	3: 2 \\
-		// \end{array}
-
-		// tamanhoStringMaximo := 0
-		// for _, node := range *conjunto {
-		// 	tamanhoStringMaximo = max(tamanhoStringMaximo, len(node.rotulo))
-		// }
-
-		fmt.Fprintf(w, "\\begin{array}{l}\n")
-		for _, node := range *conjunto {
-			var s []string
-			for _, filho := range node.filhos {
-				s = append(s, filho.rotulo)
-			}
-			fmt.Fprintf(w, "%s: %s \\\\\n", node.rotulo, strings.Join(s, ", "))
-		}
-		fmt.Fprintf(w, "\\end{array}\n")
-	})
-
-	http.HandleFunc("/grau/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
-
-		exemplos := buscarExemplos(w, r)
-		conjunto := buscarConjunto(exemplos, r)
-
-		resultado := make(map[string]map[string]int)
-
-		for _, node := range *conjunto {
-			entrada, saida := node.Grau()
-			resultado[node.rotulo] = map[string]int{
-				"entrada": entrada,
-				"saida":   saida,
-			}
-		}
-
-		bytes, err := json.MarshalIndent(resultado, "", "  ")
-		if err != nil {
-			panic(err)
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(bytes)
-	})
-
-	http.HandleFunc("/tipo/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
-
-		exemplos := buscarExemplos(w, r)
-		conjunto := buscarConjunto(exemplos, r)
-
-		type tipos struct {
-			Arvore        bool `json:"arvore"`
-			Binaria       bool `json:"binaria"`
-			Cheia         bool `json:"cheia"`
-			Completa      bool `json:"completa"`
-			GrafoCompleto bool `json:"gcompleto"`
-			Lacos         bool `json:"lacos"`
-			Simples       bool `json:"simples"`
-		}
-
-		var t tipos
-
-		nodeRaizRotulo := r.URL.Query().Get("raiz")
-
-		possuiLacos := conjunto.VerificarLacos()
-		simples := conjunto.VerificarSimples()
-		completo := conjunto.VerificarCompleto()
-
-		if nodeRaizRotulo == "" {
-			t = tipos{
-				Lacos:         possuiLacos,
-				Simples:       simples,
-				GrafoCompleto: completo,
-			}
-		} else {
-
-			raiz := conjunto.Get(nodeRaizRotulo)
-			considerarSubgrafo := r.URL.Query().Get("subgrafo") == "true"
-
-			GrafoArvore, ArvoreBinaria, ArvoreCheia, ArvoreCompleta :=
-				conjunto.VerificarArvore(
-					raiz,
-					considerarSubgrafo,
-				)
-
-			t = tipos{
-				Arvore:        GrafoArvore,
-				Binaria:       ArvoreBinaria,
-				Cheia:         ArvoreCheia,
-				Completa:      ArvoreCompleta,
-				Lacos:         possuiLacos,
-				GrafoCompleto: completo,
-				Simples:       simples,
-			}
-		}
-		bytes, err := json.Marshal(t)
-		if err != nil {
-			panic(err)
-		}
-		w.Write(bytes)
-		return
-
-	})
+	http.HandleFunc("/tipo/{conjunto}", buscarConjuntoMiddleware(tipos))
 
 	fmt.Println("http://0.0.0.0:7373")
 	log.Fatal(http.ListenAndServe("0.0.0.0:7373", logging(http.DefaultServeMux)))
