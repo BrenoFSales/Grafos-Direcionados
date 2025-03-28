@@ -313,8 +313,16 @@ func main() {
 		if nodeRaizRotulo == "" {
 			t = tipos{}
 		} else {
+
 			raiz := conjunto.Get(nodeRaizRotulo)
-			GrafoArvore, ArvoreBinaria, ArvoreCheia, ArvoreCompleta := conjunto.VerificarArvore(raiz)
+			considerarSubgrafo := r.URL.Query().Get("subgrafo") == "true"
+
+			GrafoArvore, ArvoreBinaria, ArvoreCheia, ArvoreCompleta :=
+				conjunto.VerificarArvore(
+					raiz,
+					considerarSubgrafo,
+				)
+
 			t = tipos{
 				Arvore:   GrafoArvore,
 				Binaria:  ArvoreBinaria,

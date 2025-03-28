@@ -39,7 +39,6 @@ func (a *Node) Get(id uuid.UUID) (*Node, error) {
 	}
 }
 
-
 // graus de saída e entrada de um vértice
 func (a *Node) Grau() (grauEntradaTotal int, grauSaidaTotal int) {
 	conjunto := *a.conjunto
@@ -166,7 +165,7 @@ func (c conjunto) ListaAdjacencia() conjunto {
 	return c
 }
 
-func (c conjunto) VerificarArvore(raiz *Node) (
+func (c conjunto) VerificarArvore(raiz *Node, considerarSubgrafo bool) (
 	GrafoArvore bool, ArvoreBinaria bool, ArvoreCheia bool, ArvoreCompleta bool,
 ) {
 	// não fica claro no documento quais tipos de árvores ele quer.
@@ -205,9 +204,12 @@ func (c conjunto) VerificarArvore(raiz *Node) (
 		niveis = append(niveis, nivelAtualNodes)
 		nivelAtualNodes = nivelProximoNodes
 	}
-	// existe algum nó que não é alcançável através do nó raiz. grafo não é uma árvore
-	if len(c) != len(visitados) {
-		return false, false, false, false
+	if !considerarSubgrafo {
+		// existe algum nó que não é alcançável através do nó raiz. grafo não é uma árvore
+		if len(c) != len(visitados) {
+			return false, false, false, false
+		}
+
 	}
 
 	nivelMaximo := len(niveis) - 1

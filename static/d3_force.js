@@ -354,6 +354,7 @@ let arvoreNodeRaiz = document.querySelector('#arvore-raiz')
 let tipoArvore = document.querySelector('#tipo-arvore');
 let tipoBinaria = document.querySelector('#tipo-binaria');
 let tipoCompleta = document.querySelector('#tipo-completa');
+let checkboxSubgrafo = document.querySelector('#considerar-subgrafo');
 let tipoCheia = document.querySelector('#tipo-cheia');
 
 let exemplo = document.querySelector('select#preset');
@@ -368,7 +369,9 @@ function atualizarSelectArvoreRaiz() {
 
 async function atualizarTiposDoGrafo() {
 
-	let resposta = await fetch(`/tipo/${exemplo.value}?raiz=${arvoreNodeRaiz.value}`);
+	let resposta = await fetch(
+		`/tipo/${exemplo.value}?raiz=${arvoreNodeRaiz.value}&subgrafo=${checkboxSubgrafo.checked}`
+	);
 	let {arvore, binaria, completa, cheia} = r = await resposta.json();
 
 	console.log(r);
@@ -387,7 +390,7 @@ async function atualizarTiposDoGrafo() {
 	tipoArvore.classList.add(f(arvore));
 	tipoArvore.classList.remove(f(!arvore));
 
-	tipoBinaria.textContent = f('foobar');
+	tipoBinaria.textContent = f(binaria);
 	tipoBinaria.classList.add(f(binaria));
 	tipoBinaria.classList.remove(f(!binaria));
 

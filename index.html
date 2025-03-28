@@ -84,6 +84,9 @@
 			<label style="" for="arvore-raiz">Nó raiz da árvore:</label>
 			<select onchange="atualizarTiposDoGrafo()" id="arvore-raiz" style="display: block;">
 			</select>
+			<input style="vertical-align: middle;" type="checkbox" id="considerar-subgrafo" onchange="atualizarTiposDoGrafo()" checked>
+			<label style="vertical-align: middle;" for="considerar-subgrafo">Considerar subgrafo</label>
+			<hr>
 			<div>Árvore: <span id="tipo-arvore"></span></div>
 			<ul style="margin: 0;">
 				<li>
