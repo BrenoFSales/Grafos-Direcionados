@@ -350,6 +350,10 @@ async function toggleGrausNos() {
 	}
 }
 
+let tipoGrafoCompleto = document.querySelector('#tipo-grafo-completo');
+let tipoLacos = document.querySelector('#tipo-lacos');
+let tipoSimples = document.querySelector('#tipo-simples');
+
 let arvoreNodeRaiz = document.querySelector('#arvore-raiz')
 let tipoArvore = document.querySelector('#tipo-arvore');
 let tipoBinaria = document.querySelector('#tipo-binaria');
@@ -361,9 +365,12 @@ let exemplo = document.querySelector('select#preset');
 
 function atualizarSelectArvoreRaiz() {
 	arvoreNodeRaiz.innerHTML = '';
-		arvoreNodeRaiz.innerHTML += `<option value=""></option>`;
-	for (let i = 0; i < nodes.length; i++) {
-		arvoreNodeRaiz.innerHTML += `<option value="${nodes[i].id}">${nodes[i].id}</option>`;
+	if (nodes.length === 0)  {
+		arvoreNodeRaiz.innerHTML = `<option value=""></option>`;
+	} else {
+		for (let i = 0; i < nodes.length; i++) {
+			arvoreNodeRaiz.innerHTML += `<option value="${nodes[i].id}">${nodes[i].id}</option>`;
+		}
 	}
 }
 
@@ -372,7 +379,7 @@ async function atualizarTiposDoGrafo() {
 	let resposta = await fetch(
 		`/tipo/${exemplo.value}?raiz=${arvoreNodeRaiz.value}&subgrafo=${checkboxSubgrafo.checked}`
 	);
-	let {arvore, binaria, completa, cheia} = r = await resposta.json();
+	let {arvore, binaria, completa, cheia, gcompleto, lacos, simples} = r = await resposta.json();
 
 	console.log(r);
 
@@ -386,6 +393,18 @@ async function atualizarTiposDoGrafo() {
 			return 'falso';
 		}
 	};
+	tipoSimples.textContent = f(simples);
+	tipoSimples.classList.add(f(simples));
+	tipoSimples.classList.remove(f(!simples));
+
+	tipoLacos.textContent = f(lacos);
+	tipoLacos.classList.add(f(lacos));
+	tipoLacos.classList.remove(f(!lacos));
+
+	tipoGrafoCompleto.textContent = f(gcompleto);
+	tipoGrafoCompleto.classList.add(f(gcompleto));
+	tipoGrafoCompleto.classList.remove(f(!gcompleto));
+
 	tipoArvore.textContent = f(arvore);
 	tipoArvore.classList.add(f(arvore));
 	tipoArvore.classList.remove(f(!arvore));
@@ -412,7 +431,6 @@ async function atualizar() {
 	await atualizarGrausNos();
 	atualizarSelectArvoreRaiz();
 	await atualizarTiposDoGrafo();
-
 }
 
 

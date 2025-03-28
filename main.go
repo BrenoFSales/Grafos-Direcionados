@@ -262,7 +262,17 @@ func (a *Node) GrafoGrau() int {
 
 // verifica se grafo é completo
 func (c conjunto) VerificarCompleto() bool {
-	panic("não implementado!")
+	for i := range c {
+		for j := range c {
+			if i == j {
+				continue
+			}
+			if slices.Index(c[i].filhos, c[j]) < 0 {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // verifica se grafo possuí ao menos um vértice com um laço
@@ -278,20 +288,16 @@ func (c conjunto) VerificarLacos() bool {
 // TODO: testar
 // verifica se grafo é um grafo simples
 func (c conjunto) VerificarSimples() bool {
-	var eCompleto = false
-	var possuiLacos = c.VerificarLacos()
-	var possuiArestasParalelas = false
-	for i := 0; i < len(c); i++ {
-		for j := 0; j < len(c[i].filhos); j++ {
-			for k := j + 1; k < len(c[i].filhos); k++ {
-				if c[i].filhos[j] == c[i].filhos[k] || c[i].filhos[j] == c[k].filhos[i] {
-					possuiArestasParalelas = true
-				}
+	for _, node := range c {
+		contagem := map[*Node]int{node: 1}
+		for _, filho := range node.filhos {
+			contagem[filho]++
+		}
+		for _, v := range contagem {
+			if v > 1 {
+				return false
 			}
 		}
 	}
-	if !possuiLacos && !possuiArestasParalelas {
-		eCompleto = true
-	}
-	return eCompleto
+	return true
 }

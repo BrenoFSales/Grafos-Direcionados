@@ -81,12 +81,18 @@
 		</fieldset>
 		<fieldset id="inputs">
 			<legend>Tipos do grafo</legend>
-			<label style="" for="arvore-raiz">Nó raiz da árvore:</label>
-			<select onchange="atualizarTiposDoGrafo()" id="arvore-raiz" style="display: block;">
-			</select>
-			<input style="vertical-align: middle;" type="checkbox" id="considerar-subgrafo" onchange="atualizarTiposDoGrafo()" checked>
-			<label style="vertical-align: middle;" for="considerar-subgrafo">Considerar subgrafo</label>
+			<div>Possui laços: <span id="tipo-lacos"></span></div>
+			<div>Grafo completo: <span id="tipo-grafo-completo"></span></div>
+			<div>Grafo simples: <span id="tipo-simples"></span></div>
 			<hr>
+			<div>
+				<label style="" for="arvore-raiz">Nó raiz:</label>
+				<select onchange="atualizarTiposDoGrafo()" id="arvore-raiz">
+				</select>
+			</div>
+			<input style="vertical-align: middle;" type="checkbox" id="considerar-subgrafo" onchange="atualizarTiposDoGrafo"
+				checked>
+			<label style="vertical-align: middle;" for="considerar-subgrafo">Considerar subgrafo</label>
 			<div>Árvore: <span id="tipo-arvore"></span></div>
 			<ul style="margin: 0;">
 				<li>

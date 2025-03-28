@@ -301,17 +301,29 @@ func main() {
 		conjunto := buscarConjunto(exemplos, r)
 
 		type tipos struct {
-			Arvore   bool `json:"arvore"`
-			Binaria  bool `json:"binaria"`
-			Cheia    bool `json:"cheia"`
-			Completa bool `json:"completa"`
+			Arvore        bool `json:"arvore"`
+			Binaria       bool `json:"binaria"`
+			Cheia         bool `json:"cheia"`
+			Completa      bool `json:"completa"`
+			GrafoCompleto bool `json:"gcompleto"`
+			Lacos         bool `json:"lacos"`
+			Simples       bool `json:"simples"`
 		}
 
 		var t tipos
 
 		nodeRaizRotulo := r.URL.Query().Get("raiz")
+
+		possuiLacos := conjunto.VerificarLacos()
+		simples := conjunto.VerificarSimples()
+		completo := conjunto.VerificarCompleto()
+
 		if nodeRaizRotulo == "" {
-			t = tipos{}
+			t = tipos{
+				Lacos:         possuiLacos,
+				Simples:       simples,
+				GrafoCompleto: completo,
+			}
 		} else {
 
 			raiz := conjunto.Get(nodeRaizRotulo)
@@ -324,10 +336,13 @@ func main() {
 				)
 
 			t = tipos{
-				Arvore:   GrafoArvore,
-				Binaria:  ArvoreBinaria,
-				Cheia:    ArvoreCheia,
-				Completa: ArvoreCompleta,
+				Arvore:        GrafoArvore,
+				Binaria:       ArvoreBinaria,
+				Cheia:         ArvoreCheia,
+				Completa:      ArvoreCompleta,
+				Lacos:         possuiLacos,
+				GrafoCompleto: completo,
+				Simples:       simples,
 			}
 		}
 		bytes, err := json.Marshal(t)

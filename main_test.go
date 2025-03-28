@@ -193,7 +193,7 @@ func TestVerificarArvore(t *testing.T) {
 		h = g.NovoNode("h")
 	)
 
-	arvore, binaria, cheia, completa := conjunto.VerificarArvore(a)
+	arvore, binaria, cheia, completa := conjunto.VerificarArvore(a, false)
 	if !arvore {
 		t.Log("verificação retornada não é a esperada: grafo é uma árvore")
 		t.Fail()
@@ -215,7 +215,7 @@ func TestVerificarArvore(t *testing.T) {
 	}
 
 	conjunto.Remover(h.rotulo)
-	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a)
+	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a, false)
 	if !arvore {
 		t.Log("verificação retornada não é a esperada: grafo é uma árvore")
 		t.Fail()
@@ -237,7 +237,7 @@ func TestVerificarArvore(t *testing.T) {
 	}
 
 	conjunto.Remover("x5")
-	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a)
+	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a, false)
 	if !arvore {
 		t.Log("verificação retornada não é a esperada: grafo é uma árvore")
 		t.Fail()
@@ -271,7 +271,7 @@ func TestVerificarArvore(t *testing.T) {
 	_ = g.NovoNode("x7")
 	_ = g.NovoNode("h")
 
-	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a)
+	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a, false)
 	if !arvore {
 		t.Log("verificação retornada não é a esperada: grafo é uma árvore")
 		t.Fail()
@@ -296,7 +296,7 @@ func TestVerificarArvore(t *testing.T) {
 	conjunto.NovoNode("a")
 	conjunto.NovoNode("b")
 
-	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a)
+	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a, false)
 	if arvore || binaria || cheia || completa {
 		t.Log("verificação retornada não é a esperada: grafo não é uma árvore")
 		t.Fail()
@@ -306,7 +306,7 @@ func TestVerificarArvore(t *testing.T) {
 	a = conjunto.NovoNode("a")
 	a.NovoNode("b").NovoNode("c").Conectar(a)
 
-	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a)
+	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a, false)
 	if arvore || binaria || cheia || completa {
 		t.Log("verificação retornada não é a esperada: grafo não é uma árvore")
 		t.Fail()
