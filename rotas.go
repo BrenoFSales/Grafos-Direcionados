@@ -265,6 +265,7 @@ func main() {
 		fmt.Fprintf(w, "\\end{array}\n")
 	})
 
+
 	http.HandleFunc("/grau/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
 		conjuntoSelecionado := r.PathValue("conjunto")
 		if conjuntoSelecionado == "" {
@@ -290,6 +291,18 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bytes)
 	})	
+
+	http.HandleFunc("/tipo/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
+		conjuntoSelectionado := r.PathValue("conjunto")
+		if conjuntoSelectionado == "" {
+			panic("vazio")
+		}
+
+		// conjunto := exemplos[conjuntoSelectionado]
+
+		// conjunto.VerificarArvore()
+	})
+
 
 	fmt.Println("http://0.0.0.0:7373")
 	log.Fatal(http.ListenAndServe("0.0.0.0:7373", nil))

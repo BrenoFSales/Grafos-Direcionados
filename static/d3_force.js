@@ -314,6 +314,7 @@ function atualizarListaDeNodes() {
 	}
 }
 
+
 async function atualizarGrausNos() {
 	try{
 		let exemplo = document.querySelector('select#preset');
@@ -347,6 +348,22 @@ async function toggleGrausNos() {
 		butao.textContent = 'Esconder';
 		await atualizarGrausNos();
 	}
+
+let tipoArvore = document.querySelector('#tipo-arvore');
+let tipoBinaria = document.querySelector('#tipo-binaria');
+let tipoCompleta = document.querySelector('#tipo-completa');
+let tipoCheio = document.querySelector('#tipo-cheia');
+let exemplo = document.querySelector('select#preset');
+let arvoreNodeRaiz = document.querySelector('#arvore-raiz')
+
+async function atualizarTiposDoGrafo() {
+	let raiz = arvoreNodeRaiz.value
+	// if (raiz == '') {
+	// 	alert('nenhum nó raiz selecionado')
+	// 	return
+	// }
+	// let resposta = await fetch(`/tipo/${exemplo.value}?raiz=${arvoreNodeRaiz.value}`)
+
 }
 
 
@@ -356,6 +373,7 @@ async function atualizar() {
 	await atualizarMatrizAdjacencia();
 	await atualizarListaAdjacencia();
 	await atualizarGrausNos();
+	await atualizarTiposDoGrafo();
 
 }
 
