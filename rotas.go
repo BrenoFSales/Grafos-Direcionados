@@ -44,7 +44,9 @@ func paraD3(conjunto *conjunto) D3NodeLink {
 	return saida
 }
 
-func main() {
+type exemploSelecao map[string]*conjunto
+
+func inicializarExemplos() map[string]*conjunto {
 	principal := NovoConjunto()
 	a := principal.NovoNode("a")
 	b := principal.NovoNode("b")
@@ -92,20 +94,35 @@ func main() {
 	g.NovoNode("n")
 	g.NovoNode("o")
 
-	exemplos := map[string]*conjunto{
+	exemplos := exemploSelecao{
 		"principal": principal,
 		"completo":  grafoCompleto,
 		"binaria":   arvoreBinaria,
 	}
+	return exemplos
+}
+
+func buscarConjunto(exemplos exemploSelecao, r *http.Request) *conjunto {
+	conjuntoSelectionado := r.PathValue("conjunto")
+	if conjuntoSelectionado == "" {
+		panic("vazio")
+	}
+
+	return exemplos[conjuntoSelectionado]
+}
+
+var exemplos = inicializarExemplos()
+
+func buscarExemplos(_ http.ResponseWriter, _ *http.Request) exemploSelecao {
+	return exemplos
+}
+
+func main() {
 
 	http.HandleFunc("/link/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
 
-		conjuntoSelectionado := r.PathValue("conjunto")
-		if conjuntoSelectionado == "" {
-			panic("vazio")
-		}
-
-		conjunto := exemplos[conjuntoSelectionado]
+		exemplos := buscarExemplos(w, r)
+		conjunto := buscarConjunto(exemplos, r)
 
 		bytes, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -140,12 +157,8 @@ func main() {
 
 	http.HandleFunc("/node/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
 
-		conjuntoSelectionado := r.PathValue("conjunto")
-		if conjuntoSelectionado == "" {
-			panic("vazio")
-		}
-
-		conjunto := exemplos[conjuntoSelectionado]
+		exemplos := buscarExemplos(w, r)
+		conjunto := buscarConjunto(exemplos, r)
 
 		switch r.Method {
 		case "GET":
@@ -201,15 +214,12 @@ func main() {
 	})
 
 	http.HandleFunc("/matriz/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
-		conjuntoSelectionado := r.PathValue("conjunto")
-		if conjuntoSelectionado == "" {
-			panic("vazio")
-		}
 
-		conjunto := exemplos[conjuntoSelectionado]
+		exemplos := buscarExemplos(w, r)
+		conjunto := buscarConjunto(exemplos, r)
 
 		rotulos_ := r.URL.Query().Get("rotulo")
-		if conjuntoSelectionado == "" {
+		if rotulos_ == "" {
 			panic("vazio")
 		}
 		exibirRotulos := rotulos_ == "true"
@@ -233,12 +243,9 @@ func main() {
 	})
 
 	http.HandleFunc("/lista/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
-		conjuntoSelectionado := r.PathValue("conjunto")
-		if conjuntoSelectionado == "" {
-			panic("vazio")
-		}
 
-		conjunto := exemplos[conjuntoSelectionado]
+		exemplos := buscarExemplos(w, r)
+		conjunto := buscarConjunto(exemplos, r)
 
 		// cria a representação em latex de uma lista de adjacência.
 		// o resultado é sempre algo parecido com isso:
@@ -266,12 +273,9 @@ func main() {
 	})
 
 	http.HandleFunc("/grau/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
-		conjuntoSelecionado := r.PathValue("conjunto")
-		if conjuntoSelecionado == "" {
-			panic("vazio")
-		}
 
-		conjunto := exemplos[conjuntoSelecionado]
+		exemplos := buscarExemplos(w, r)
+		conjunto := buscarConjunto(exemplos, r)
 
 		resultado := make(map[string]map[string]int)
 
@@ -292,12 +296,9 @@ func main() {
 	})
 
 	http.HandleFunc("/tipo/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
-		conjuntoSelectionado := r.PathValue("conjunto")
-		if conjuntoSelectionado == "" {
-			panic("vazio")
-		}
 
-		conjunto := exemplos[conjuntoSelectionado]
+		exemplos := buscarExemplos(w, r)
+		conjunto := buscarConjunto(exemplos, r)
 
 		type tipos struct {
 			Arvore   bool `json:"arvore"`
@@ -331,5 +332,5 @@ func main() {
 	})
 
 	fmt.Println("http://0.0.0.0:7373")
-	log.Fatal(http.ListenAndServe("0.0.0.0:7373", nil))
+	log.Fatal(http.ListenAndServe("0.0.0.0:7373", logging(http.DefaultServeMux)))
 }
