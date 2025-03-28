@@ -265,7 +265,6 @@ func main() {
 		fmt.Fprintf(w, "\\end{array}\n")
 	})
 
-
 	http.HandleFunc("/grau/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
 		conjuntoSelecionado := r.PathValue("conjunto")
 		if conjuntoSelecionado == "" {
@@ -290,7 +289,7 @@ func main() {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bytes)
-	})	
+	})
 
 	http.HandleFunc("/tipo/{conjunto}", func(w http.ResponseWriter, r *http.Request) {
 		conjuntoSelectionado := r.PathValue("conjunto")
@@ -298,11 +297,38 @@ func main() {
 			panic("vazio")
 		}
 
-		// conjunto := exemplos[conjuntoSelectionado]
+		conjunto := exemplos[conjuntoSelectionado]
 
-		// conjunto.VerificarArvore()
+		type tipos struct {
+			Arvore   bool `json:"arvore"`
+			Binaria  bool `json:"binaria"`
+			Cheia    bool `json:"cheia"`
+			Completa bool `json:"completa"`
+		}
+
+		var t tipos
+
+		nodeRaizRotulo := r.URL.Query().Get("raiz")
+		if nodeRaizRotulo == "" {
+			t = tipos{}
+		} else {
+			raiz := conjunto.Get(nodeRaizRotulo)
+			GrafoArvore, ArvoreBinaria, ArvoreCheia, ArvoreCompleta := conjunto.VerificarArvore(raiz)
+			t = tipos{
+				Arvore:   GrafoArvore,
+				Binaria:  ArvoreBinaria,
+				Cheia:    ArvoreCheia,
+				Completa: ArvoreCompleta,
+			}
+		}
+		bytes, err := json.Marshal(t)
+		if err != nil {
+			panic(err)
+		}
+		w.Write(bytes)
+		return
+
 	})
-
 
 	fmt.Println("http://0.0.0.0:7373")
 	log.Fatal(http.ListenAndServe("0.0.0.0:7373", nil))

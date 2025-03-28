@@ -350,21 +350,54 @@ async function toggleGrausNos() {
 	}
 }
 
+let arvoreNodeRaiz = document.querySelector('#arvore-raiz')
 let tipoArvore = document.querySelector('#tipo-arvore');
 let tipoBinaria = document.querySelector('#tipo-binaria');
 let tipoCompleta = document.querySelector('#tipo-completa');
-let tipoCheio = document.querySelector('#tipo-cheia');
+let tipoCheia = document.querySelector('#tipo-cheia');
+
 let exemplo = document.querySelector('select#preset');
-let arvoreNodeRaiz = document.querySelector('#arvore-raiz')
+
+function atualizarSelectArvoreRaiz() {
+	arvoreNodeRaiz.innerHTML = '';
+		arvoreNodeRaiz.innerHTML += `<option value=""></option>`;
+	for (let i = 0; i < nodes.length; i++) {
+		arvoreNodeRaiz.innerHTML += `<option value="${nodes[i].id}">${nodes[i].id}</option>`;
+	}
+}
 
 async function atualizarTiposDoGrafo() {
-	let raiz = arvoreNodeRaiz.value
-	// if (raiz == '') {
-	// 	alert('nenhum nó raiz selecionado')
-	// 	return
-	// }
-	// let resposta = await fetch(`/tipo/${exemplo.value}?raiz=${arvoreNodeRaiz.value}`)
 
+	let resposta = await fetch(`/tipo/${exemplo.value}?raiz=${arvoreNodeRaiz.value}`);
+	let {arvore, binaria, completa, cheia} = r = await resposta.json();
+
+	console.log(r);
+
+
+	let f = (x) => {
+		if (x == null) {
+			return 'null';
+		} else if (x) {
+			return 'verdadeiro';
+		} else {
+			return 'falso';
+		}
+	};
+	tipoArvore.textContent = f(arvore);
+	tipoArvore.classList.add(f(arvore));
+	tipoArvore.classList.remove(f(!arvore));
+
+	tipoBinaria.textContent = f('foobar');
+	tipoBinaria.classList.add(f(binaria));
+	tipoBinaria.classList.remove(f(!binaria));
+
+	tipoCompleta.textContent = f(completa);
+	tipoCompleta.classList.add(f(completa));
+	tipoCompleta.classList.remove(f(!completa));
+
+	tipoCheia.textContent = f(cheia);
+	tipoCheia.classList.add(f(cheia));
+	tipoCheia.classList.remove(f(!cheia));
 }
 
 
@@ -374,6 +407,7 @@ async function atualizar() {
 	await atualizarMatrizAdjacencia();
 	await atualizarListaAdjacencia();
 	await atualizarGrausNos();
+	atualizarSelectArvoreRaiz();
 	await atualizarTiposDoGrafo();
 
 }

@@ -98,3 +98,11 @@ h1 {
 .hidden {
 	display: none;
 }
+
+.verdadeiro {
+	color: green;
+}
+
+.falso {
+	color: red;
+}

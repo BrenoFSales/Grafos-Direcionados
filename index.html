@@ -82,9 +82,9 @@
 		<fieldset id="inputs">
 			<legend>Tipos do grafo</legend>
 			<label style="" for="arvore-raiz">Nó raiz da árvore:</label>
-			<select id="arvore-raiz" style="display: block;">
+			<select onchange="atualizarTiposDoGrafo()" id="arvore-raiz" style="display: block;">
 			</select>
-			<div>Árvore: <span id="tipo-binaria"></span></div>
+			<div>Árvore: <span id="tipo-arvore"></span></div>
 			<ul style="margin: 0;">
 				<li>
 					<div>Binária: <span id="tipo-binaria"></span></div>
