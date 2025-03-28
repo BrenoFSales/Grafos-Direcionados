@@ -12,26 +12,26 @@ type conjunto []*Node
 
 type Node struct {
 	conjunto *conjunto // Conjunto de todos os vértices do grafo
-	rotulo   string    // "Valor" do nó
-	id       uuid.UUID // Identificador único do nó
-	filhos   []*Node   // Relações do nó
+	Rotulo   string    // "Valor" do nó
+	Id       uuid.UUID // Identificador único do nó
+	Filhos   []*Node   // Relações do nó
 	x, y     float64   // Posição dos nós na interface ??????
 }
 
 // aresta unidirecional entre dois nós: a -> b.
 func (a *Node) Conectar(b *Node) {
 	_ = *b
-	a.filhos = append(a.filhos, b)
+	a.Filhos = append(a.Filhos, b)
 }
 
 // deve retornar o primeiro nó com o mesmo id caso haja mais de um.
 func (a *Node) Get(id uuid.UUID) (*Node, error) {
 	// panic("não implementado!")
-	if a.id == id {
+	if a.Id == id {
 		return a, nil
 	} else {
-		for _, node := range a.filhos {
-			if node.id == id {
+		for _, node := range a.Filhos {
+			if node.Id == id {
 				return node, nil
 			}
 		}
@@ -43,10 +43,10 @@ func (a *Node) Get(id uuid.UUID) (*Node, error) {
 func (a *Node) Grau() (grauEntradaTotal int, grauSaidaTotal int) {
 	conjunto := *a.conjunto
 
-	grauSaidaTotal = len(a.filhos)
+	grauSaidaTotal = len(a.Filhos)
 
 	for i := range conjunto {
-		for _, f := range conjunto[i].filhos {
+		for _, f := range conjunto[i].Filhos {
 			if f == a {
 				grauEntradaTotal++
 			}
@@ -57,11 +57,11 @@ func (a *Node) Grau() (grauEntradaTotal int, grauSaidaTotal int) {
 
 // deve remover o primeiro nó caso o haja mais de um com o mesmo id.
 func (a *Node) Remover(id uuid.UUID) {
-	idx := slices.IndexFunc(a.filhos, func(x *Node) bool {
-		return x.id == id
+	idx := slices.IndexFunc(a.Filhos, func(x *Node) bool {
+		return x.Id == id
 	})
 	if idx != -1 {
-		a.filhos = slices.Delete(a.filhos, idx, idx+1)
+		a.Filhos = slices.Delete(a.Filhos, idx, idx+1)
 	} else {
 		panic("O IndexFunc retornou -1 para o Node, esse índice não existe!")
 	}
@@ -70,7 +70,7 @@ func (a *Node) Remover(id uuid.UUID) {
 func (c *conjunto) Remover(rotulo string) {
 
 	idx := slices.IndexFunc(*c, func(x *Node) bool {
-		return x.rotulo == rotulo
+		return x.Rotulo == rotulo
 	})
 
 	if idx != -1 { // Evita erro ao acessar índices inválidos
@@ -80,12 +80,12 @@ func (c *conjunto) Remover(rotulo string) {
 	}
 
 	for _, node := range *c {
-		idxFilho := slices.IndexFunc(node.filhos, func(x *Node) bool {
-			return x.rotulo == rotulo
+		idxFilho := slices.IndexFunc(node.Filhos, func(x *Node) bool {
+			return x.Rotulo == rotulo
 		})
 
 		if idxFilho != -1 {
-			node.filhos = slices.Delete(node.filhos, idxFilho, idxFilho+1)
+			node.Filhos = slices.Delete(node.Filhos, idxFilho, idxFilho+1)
 		}
 	}
 }
@@ -94,9 +94,9 @@ func (c *conjunto) Remover(rotulo string) {
 func (c *conjunto) NovoNode(rotulo string) *Node {
 	node := &Node{
 		conjunto: c,
-		rotulo:   rotulo,
-		filhos:   make([]*Node, 0),
-		id:       uuid.New(),
+		Rotulo:   rotulo,
+		Filhos:   make([]*Node, 0),
+		Id:       uuid.New(),
 	}
 	*c = append(*c, node)
 	return node
@@ -105,7 +105,7 @@ func (c *conjunto) NovoNode(rotulo string) *Node {
 // Retorna o primeiro nó encontrado
 func (c *conjunto) Get(rotulo string) *Node {
 	idx := slices.IndexFunc(*c, func(x *Node) bool {
-		return x.rotulo == rotulo
+		return x.Rotulo == rotulo
 	})
 	return (*c)[idx]
 }
@@ -128,7 +128,7 @@ func NovoConjunto() *conjunto {
 
 func contarOcorrenciasDoMesmoNode(pai, filho *Node) int {
 	retorno := 0
-	for _, n := range pai.filhos {
+	for _, n := range pai.Filhos {
 		if n == filho {
 			retorno++
 		}
@@ -141,7 +141,7 @@ func contarOcorrenciasDoMesmoNode(pai, filho *Node) int {
 func (c conjunto) MatrizAdjacencia() ([][]int, []string) {
 	clone := slices.Clone(c)
 	slices.SortFunc(clone, func(a, b *Node) int {
-		return strings.Compare(a.rotulo, b.rotulo)
+		return strings.Compare(a.Rotulo, b.Rotulo)
 	})
 	var (
 		rotulos = make([]string, len(clone))
@@ -151,7 +151,7 @@ func (c conjunto) MatrizAdjacencia() ([][]int, []string) {
 		matriz[i] = make([]int, len(clone))
 	}
 	for i := range clone {
-		rotulos[i] = clone[i].rotulo
+		rotulos[i] = clone[i].Rotulo
 		for j := range clone {
 			matriz[i][j] = contarOcorrenciasDoMesmoNode(clone[i], clone[j])
 		}
@@ -194,12 +194,12 @@ func (c conjunto) VerificarArvore(raiz *Node, considerarSubgrafo bool) (
 			if slices.Index(visitados, n) > -1 {
 				return false, false, false, false
 			}
-			if len(n.filhos) != 2 && len(n.filhos) != 0 {
+			if len(n.Filhos) != 2 && len(n.Filhos) != 0 {
 				ArvoreCheia = false
 			}
-			nivelProximoNodes = append(nivelProximoNodes, n.filhos...)
+			nivelProximoNodes = append(nivelProximoNodes, n.Filhos...)
 			visitados = append(visitados, n)
-			graus = append(graus, len(n.filhos))
+			graus = append(graus, len(n.Filhos))
 		}
 		niveis = append(niveis, nivelAtualNodes)
 		nivelAtualNodes = nivelProximoNodes
@@ -226,7 +226,7 @@ func (c conjunto) VerificarArvore(raiz *Node, considerarSubgrafo bool) (
 		contiguo := true
 		ultimoNivel := i+1 == len(niveis)
 		for j := range niveis[i] {
-			l := len(niveis[i][j].filhos)
+			l := len(niveis[i][j].Filhos)
 			if contiguo {
 				contiguo = contiguo && l == 2
 			} else if l > 0 {
@@ -267,7 +267,7 @@ func (c conjunto) VerificarCompleto() bool {
 			if i == j {
 				continue
 			}
-			if slices.Index(c[i].filhos, c[j]) < 0 {
+			if slices.Index(c[i].Filhos, c[j]) < 0 {
 				return false
 			}
 		}
@@ -278,7 +278,7 @@ func (c conjunto) VerificarCompleto() bool {
 // verifica se grafo possuí ao menos um vértice com um laço
 func (c conjunto) VerificarLacos() bool {
 	for _, n := range c {
-		if slices.Index(n.filhos, n) > -1 {
+		if slices.Index(n.Filhos, n) > -1 {
 			return true
 		}
 	}
@@ -290,7 +290,7 @@ func (c conjunto) VerificarLacos() bool {
 func (c conjunto) VerificarSimples() bool {
 	for _, node := range c {
 		contagem := map[*Node]int{node: 1}
-		for _, filho := range node.filhos {
+		for _, filho := range node.Filhos {
 			contagem[filho]++
 		}
 		for _, v := range contagem {

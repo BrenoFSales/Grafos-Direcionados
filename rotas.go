@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 )
 
@@ -31,8 +33,14 @@ type exemploSelecao map[string]*conjunto
 type handlerFunc func(http.ResponseWriter, *http.Request, *conjunto)
 
 var (
-	store = sessions.NewCookieStore([]byte("something-very-secret"))
+	store   = sessions.NewCookieStore([]byte("something-very-secret"))
+	sessoes = map[string]exemploSelecao{}
 )
+
+func init() {
+	gob.Register(exemploSelecao{})
+	gob.Register(&Node{})
+}
 
 func paraD3(conjunto *conjunto) D3NodeLink {
 
@@ -42,12 +50,12 @@ func paraD3(conjunto *conjunto) D3NodeLink {
 	}
 	for _, node := range *conjunto {
 		saida.Nodes = append(saida.Nodes, D3Node{
-			Id: node.rotulo,
+			Id: node.Rotulo,
 		})
-		for _, filho := range node.filhos {
+		for _, filho := range node.Filhos {
 			saida.Links = append(saida.Links, D3Link{
-				Source: node.rotulo,
-				Target: filho.rotulo},
+				Source: node.Rotulo,
+				Target: filho.Rotulo},
 			)
 		}
 	}
@@ -55,6 +63,7 @@ func paraD3(conjunto *conjunto) D3NodeLink {
 }
 
 func inicializarExemplos() map[string]*conjunto {
+	log.Println("novo exemplo!")
 	principal := NovoConjunto()
 	a := principal.NovoNode("a")
 	b := principal.NovoNode("b")
@@ -77,7 +86,6 @@ func inicializarExemplos() map[string]*conjunto {
 			}
 			a, b := grafoCompletoVertices[i], grafoCompletoVertices[j]
 			a.Conectar(b)
-			b.Conectar(a)
 		}
 	}
 
@@ -116,14 +124,18 @@ func buscarConjunto(exemplos exemploSelecao, r *http.Request) *conjunto {
 		panic("vazio")
 	}
 
-	return exemplos[conjuntoSelectionado]
+	e, ok := exemplos[conjuntoSelectionado]
+	if !ok {
+		panic(fmt.Errorf("%#v %v", exemplos, conjuntoSelectionado))
+	}
+	return e
 }
 
-var exemplos = inicializarExemplos()
+// var exemplos = inicializarExemplos()
 
-func buscarExemplos(_ http.ResponseWriter, _ *http.Request) exemploSelecao {
-	return exemplos
-}
+// func buscarExemplos(_ http.ResponseWriter, _ *http.Request) exemploSelecao {
+// 	return exemplos
+// }
 
 func conexaoNodes(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
 	bytes, err := io.ReadAll(r.Body)
@@ -147,7 +159,7 @@ func conexaoNodes(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
 		source.Conectar(target)
 		w.WriteHeader(204)
 	case "DELETE":
-		source.Remover(target.id)
+		source.Remover(target.Id)
 		w.WriteHeader(204)
 	default:
 		w.WriteHeader(405)
@@ -234,14 +246,6 @@ func matriz(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
 
 }
 
-func buscarConjuntoMiddleware(f handlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		conjunto := buscarConjunto(exemplos, r)
-
-		f(w, r, conjunto)
-	}
-}
-
 func lista(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
 
 	// cria a representação em latex de uma lista de adjacência.
@@ -261,10 +265,10 @@ func lista(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
 	fmt.Fprintf(w, "\\begin{array}{l}\n")
 	for _, node := range *conjunto {
 		var s []string
-		for _, filho := range node.filhos {
-			s = append(s, filho.rotulo)
+		for _, filho := range node.Filhos {
+			s = append(s, filho.Rotulo)
 		}
-		fmt.Fprintf(w, "%s: %s \\\\\n", node.rotulo, strings.Join(s, ", "))
+		fmt.Fprintf(w, "%s: %s \\\\\n", node.Rotulo, strings.Join(s, ", "))
 	}
 	fmt.Fprintf(w, "\\end{array}\n")
 }
@@ -275,7 +279,7 @@ func grau(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
 
 	for _, node := range *conjunto {
 		entrada, saida := node.Grau()
-		resultado[node.rotulo] = map[string]int{
+		resultado[node.Rotulo] = map[string]int{
 			"entrada": entrada,
 			"saida":   saida,
 		}
@@ -347,34 +351,49 @@ func tipos(w http.ResponseWriter, r *http.Request, conjunto *conjunto) {
 
 // func buscarConjuntoMiddleware(f handlerFunc) http.HandlerFunc {
 // 	return func(w http.ResponseWriter, r *http.Request) {
-// 		// Get a session. Get() always returns a session, even if empty.
-// 		session, err := store.Get(r, "session_id")
-// 		if err != nil {
-// 			http.Error(w, err.Error(), http.StatusInternalServerError)
-// 			return
-// 		}
-//
-// 		id := session.Values["id"]
-// 		if id == nil {
-// 			session.Values["id"] = inicializarExemplos()
-// 		}
-// 		exemplos, ok := id.(exemploSelecao)
-// 		if !ok {
-// 			exemplos = inicializarExemplos()
-// 			session.Values["id"] = exemplos
-// 		}
-//
 // 		conjunto := buscarConjunto(exemplos, r)
-//
-// 		err = session.Save(r, w)
-// 		if err != nil {
-// 			http.Error(w, err.Error(), http.StatusInternalServerError)
-// 			return
-// 		}
-//
 // 		f(w, r, conjunto)
 // 	}
 // }
+
+func buscarConjuntoMiddleware(proximo handlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		s, err := store.Get(r, "session_id")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		var exemplos exemploSelecao
+
+		id, ok := s.Values["id"].(string)
+		if !ok {
+			exemplos = inicializarExemplos()
+			id = uuid.NewString()
+			sessoes[id] = exemplos
+			s.Values["id"] = id
+		} else {
+			exemplos_, ok := sessoes[id]
+			if !ok {
+				exemplos_ = inicializarExemplos()
+				sessoes[id] = exemplos_
+			}
+			exemplos = exemplos_
+		}
+
+		if exemplos == nil {
+			panic("nil exemplos")
+		}
+
+		err = s.Save(r, w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		proximo(w, r, buscarConjunto(exemplos, r))
+	}
+}
 
 func main() {
 

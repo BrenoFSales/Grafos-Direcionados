@@ -14,7 +14,7 @@ func TestNode(t *testing.T) {
 	a.Conectar(b)
 	a.Conectar(c)
 
-	resultado, err := a.Get(b.id)
+	resultado, err := a.Get(b.Id)
 
 	if err != nil {
 		t.Fatal(err)
@@ -26,9 +26,9 @@ func TestNode(t *testing.T) {
 		t.Fatalf("nó resultado não é o esperado. resultado: %p, esperado: %p", resultado, esperado)
 	}
 
-	a.Remover(b.id)
+	a.Remover(b.Id)
 
-	resultado, err = a.Get(c.id)
+	resultado, err = a.Get(c.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -214,7 +214,7 @@ func TestVerificarArvore(t *testing.T) {
 		t.FailNow()
 	}
 
-	conjunto.Remover(h.rotulo)
+	conjunto.Remover(h.Rotulo)
 	arvore, binaria, cheia, completa = conjunto.VerificarArvore(a, false)
 	if !arvore {
 		t.Log("verificação retornada não é a esperada: grafo é uma árvore")
@@ -328,7 +328,6 @@ func TestVerificarCompleto(t *testing.T) {
 			}
 			a, b := vertices[i], vertices[j]
 			a.Conectar(b)
-			b.Conectar(a)
 		}
 	}
 	resultado := conjunto.VerificarCompleto()
@@ -338,7 +337,7 @@ func TestVerificarCompleto(t *testing.T) {
 		t.Fatal("verificação retornada não é a esperada: grafo é completo")
 	}
 
-	vertices[0].Remover(vertices[1].id)
+	vertices[0].Remover(vertices[1].Id)
 
 	resultado = conjunto.VerificarCompleto()
 	esperado = false

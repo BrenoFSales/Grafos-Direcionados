@@ -168,7 +168,8 @@ async function deletarNode() {
 		throw resposta.ok;
 	}
 
-	links = links.filter(link => !(link.source.id === input.value || link.target.id === input.value));
+	links = links.filter(link => link.source.id !== input.value && link.target.id !== input.value);
+	links = links.filter(link => link.source !== input.value && link.target !== input.value);
 	nodes = nodes.filter(node => node.id !== deletar.id);
 
 
@@ -176,6 +177,9 @@ async function deletarNode() {
 
 	// OBS! Se adicionar um novo Nó e removê-lo só funciona depois de recarregar o cache,
 	// e caso o Nó tenha arestas ligadas a ele, ao removê-lo a aplicação crasha
+
+
+	// Porque isso acontence???
 
 	await atualizar()
 }
