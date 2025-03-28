@@ -348,6 +348,7 @@ async function toggleGrausNos() {
 		butao.textContent = 'Esconder';
 		await atualizarGrausNos();
 	}
+}
 
 let tipoArvore = document.querySelector('#tipo-arvore');
 let tipoBinaria = document.querySelector('#tipo-binaria');
